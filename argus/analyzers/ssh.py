@@ -19,6 +19,7 @@ class SSHAnalyzer(BaseAnalyzer):
         self._check_listen_address(ssh_config, findings)
         self._check_x11_forwarding(ssh_config, findings)
         self._check_max_auth_tries(ssh_config, findings)
+        self._check_weak_ciphers(ssh_config, findings)
         return findings
 
     def _check_root_login(
@@ -128,4 +129,30 @@ class SSHAnalyzer(BaseAnalyzer):
                 evidence=[f"MaxAuthTries {config.max_auth_tries}"],
                 recommendation="Set MaxAuthTries to 3 or lower.",
                 mitre=["T1110"],
+            ))
+
+    def _check_weak_ciphers(
+        self, config: SSHConfig, findings: list[Finding]
+    ) -> None:
+        """Check for weak SSH ciphers."""
+        weak_ciphers = {
+            "arcfour", "arcfour128", "arcfour256",
+            "3des-cbc", "blowfish-cbc", "cast128-cbc",
+            "aes128-cbc", "aes192-cbc", "aes256-cbc",
+        }
+        if not config.ciphers:
+            return
+        found_weak = [c for c in config.ciphers if c in weak_ciphers]
+        if found_weak:
+            findings.append(self._make_finding(
+                finding_id="ARGUS-SSH-007",
+                title="Weak SSH ciphers configured",
+                severity="medium",
+                description=(
+                    f"Weak ciphers are configured: {', '.join(found_weak)}. "
+                    "CBC-mode ciphers are vulnerable to padding oracle attacks."
+                ),
+                evidence=[f"Cipher: {c}" for c in found_weak],
+                recommendation="Remove weak ciphers. Use aes256-gcm, chacha20-poly1305.",
+                mitre=["T1040"],
             ))
