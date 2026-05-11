@@ -19,6 +19,7 @@ class UserAnalyzer(BaseAnalyzer):
         self._check_uid_zero(users, findings)
         self._check_empty_passwords(users, findings)
         self._check_service_accounts_with_shells(users, findings)
+        self._check_root_ssh_keys(users, findings)
         return findings
 
     def _check_uid_zero(
@@ -84,4 +85,31 @@ class UserAnalyzer(BaseAnalyzer):
                     evidence=[f"{user.username}:uid={user.uid}:shell={user.shell}"],
                     recommendation=f"Set shell to /usr/sbin/nologin for '{user.username}'.",
                     mitre=["T1078.003"],
+                ))
+
+    def _check_root_ssh_keys(
+        self, users: list[UserInfo], findings: list[Finding]
+    ) -> None:
+        """Check for root account with SSH authorized keys."""
+        from pathlib import Path
+
+        root_auth_keys = Path("/root/.ssh/authorized_keys")
+        if root_auth_keys.is_file():
+            content = root_auth_keys.read_text().strip()
+            key_count = len([
+                l for l in content.splitlines()
+                if l.strip() and not l.strip().startswith("#")
+            ])
+            if key_count > 0:
+                findings.append(self._make_finding(
+                    finding_id="ARGUS-USR-004",
+                    title=f"Root has {key_count} SSH authorized key(s)",
+                    severity="medium",
+                    description=(
+                        f"The root account has {key_count} authorized SSH key(s). "
+                        "Direct root SSH access should be minimized."
+                    ),
+                    evidence=[f"Keys found: {key_count} in /root/.ssh/authorized_keys"],
+                    recommendation="Remove unnecessary root SSH keys. Use sudo instead.",
+                    mitre=["T1098.004"],
                 ))
