@@ -56,3 +56,31 @@ def render_findings_table(findings: list[Finding]) -> None:
     console.print()
     console.print(table)
     console.print()
+
+
+def render_summary_panel(findings: list[Finding], hostname: str = "") -> None:
+    """Render a summary panel with finding counts."""
+    critical = sum(1 for f in findings if f.severity == SeverityLevel.CRITICAL)
+    high = sum(1 for f in findings if f.severity == SeverityLevel.HIGH)
+    medium = sum(1 for f in findings if f.severity == SeverityLevel.MEDIUM)
+    low = sum(1 for f in findings if f.severity == SeverityLevel.LOW)
+    info = sum(1 for f in findings if f.severity == SeverityLevel.INFO)
+
+    lines = [
+        f"[bold]Host:[/bold] {hostname}" if hostname else "",
+        f"[bold]Total findings:[/bold] {len(findings)}",
+        "",
+        f"  [bold red]CRITICAL[/bold red]  {critical}",
+        f"  [red]HIGH[/red]      {high}",
+        f"  [yellow]MEDIUM[/yellow]    {medium}",
+        f"  [cyan]LOW[/cyan]       {low}",
+        f"  [dim]INFO[/dim]      {info}",
+    ]
+    summary_text = "\n".join(line for line in lines if line or line == "")
+
+    console.print(Panel(
+        summary_text,
+        title="[bold]ARGUS Scan Summary[/bold]",
+        border_style="cyan",
+        padding=(1, 2),
+    ))
