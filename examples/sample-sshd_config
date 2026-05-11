@@ -1,0 +1,22 @@
+# Sample sshd_config for ARGUS testing
+# This file contains intentionally insecure settings for testing purposes.
+
+Port 22
+ListenAddress 0.0.0.0
+Protocol 2
+
+PermitRootLogin yes
+PasswordAuthentication yes
+PermitEmptyPasswords no
+MaxAuthTries 6
+LoginGraceTime 120
+
+X11Forwarding yes
+
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+
+ChallengeResponseAuthentication no
+UsePAM yes
+
+Subsystem sftp /usr/lib/openssh/sftp-server
