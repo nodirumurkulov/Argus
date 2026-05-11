@@ -91,3 +91,23 @@ class SystemdCollector(BaseCollector):
             status = enabled_units.get(service.name, "")
             service.state = status
             service.enabled = status in ("enabled", "enabled-runtime", "static")
+
+    def collect_timers(self) -> list[dict[str, str]]:
+        """Collect active systemd timers."""
+        output = self.safe_run_command(
+            ["systemctl", "list-timers", "--all", "--no-pager", "--no-legend"]
+        )
+        if output is None:
+            return []
+        timers: list[dict[str, str]] = []
+        for line in output.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split()
+            if len(parts) >= 2:
+                timers.append({
+                    "unit": parts[-1] if parts else "",
+                    "raw": line,
+                })
+        return timers
