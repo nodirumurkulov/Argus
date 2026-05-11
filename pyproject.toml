@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "argus-security"
+version = "0.1.0"
+description = "ARGUS - Offline AI Defensive Security Assistant"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [
+    {name = "Nodirjon Umurkulov", email = "nodirumurkulov128@gmail.com"},
+]
+keywords = ["security", "defensive", "blue-team", "linux", "cli", "offline", "ai"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+    "Topic :: System :: Systems Administration",
+]
+dependencies = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "pydantic>=2.0.0",
+    "jinja2>=3.1.0",
+    "pyyaml>=6.0",
+    "requests>=2.31.0",
+    "python-dateutil>=2.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+argus = "argus.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/nodirumurkulov/Argus"
+Repository = "https://github.com/nodirumurkulov/Argus"
+Issues = "https://github.com/nodirumurkulov/Argus/issues"
+
+[tool.setuptools.packages.find]
+include = ["argus*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
