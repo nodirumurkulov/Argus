@@ -108,6 +108,7 @@ def scan_host(
     from argus.analyzers.engine import run_all_analyzers
     from argus.collectors.aggregator import collect_host_data
     from argus.output import (
+        render_collector_stats,
         render_findings_table,
         render_host_info,
         render_recommendations,
@@ -129,6 +130,13 @@ def scan_host(
         os_release=host_data.os_release,
         kernel_version=host_data.kernel_version,
         uptime=host_data.uptime,
+    )
+    render_collector_stats(
+        users_count=len(host_data.users),
+        ports_count=len(host_data.network_connections),
+        services_count=len(host_data.systemd_services),
+        packages_count=len(host_data.packages),
+        cron_count=len(host_data.cron_entries),
     )
 
     console.print("\n[bold]Analyzing security posture...[/bold]\n")

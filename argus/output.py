@@ -141,6 +141,25 @@ def render_finding_detail(finding: Finding) -> None:
     ))
 
 
+def render_collector_stats(
+    users_count: int,
+    ports_count: int,
+    services_count: int,
+    packages_count: int,
+    cron_count: int,
+) -> None:
+    """Render collector statistics."""
+    stats_table = Table(show_header=False, box=None, padding=(0, 2))
+    stats_table.add_column("Label", style="bold")
+    stats_table.add_column("Value")
+    stats_table.add_row("Users", str(users_count))
+    stats_table.add_row("Open ports", str(ports_count))
+    stats_table.add_row("Systemd services", str(services_count))
+    stats_table.add_row("Installed packages", str(packages_count))
+    stats_table.add_row("Cron entries", str(cron_count))
+    console.print(Panel(stats_table, title="[bold]Collection Stats[/bold]", border_style="dim"))
+
+
 def render_host_info(
     hostname: str,
     os_release: str,
