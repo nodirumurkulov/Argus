@@ -18,3 +18,12 @@ class LLMConfig(BaseModel):
     temperature: float = 0.2
     timeout: int = 120
     enabled: bool = True
+
+
+class OutputConfig(BaseModel):
+    """Output configuration."""
+
+    default_format: str = "markdown"
+    output_dir: str = "."
+    colorize: bool = True
+    verbose: bool = False
