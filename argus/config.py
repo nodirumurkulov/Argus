@@ -27,3 +27,12 @@ class OutputConfig(BaseModel):
     output_dir: str = "."
     colorize: bool = True
     verbose: bool = False
+
+
+class ArgusConfig(BaseModel):
+    """Root ARGUS configuration."""
+
+    llm: LLMConfig = Field(default_factory=LLMConfig)
+    output: OutputConfig = Field(default_factory=OutputConfig)
+    scan_timeout: int = 300
+    log_level: str = "info"
