@@ -39,3 +39,21 @@ class SSHAnalyzer(BaseAnalyzer):
                 recommendation="Set 'PermitRootLogin no' in /etc/ssh/sshd_config and reload SSH.",
                 mitre=["T1078", "T1021.004"],
             ))
+
+    def _check_password_auth(
+        self, config: SSHConfig, findings: list[Finding]
+    ) -> None:
+        """Check if password authentication is enabled."""
+        if config.password_authentication.lower() == "yes":
+            findings.append(self._make_finding(
+                finding_id="ARGUS-SSH-002",
+                title="SSH password authentication is enabled",
+                severity="medium",
+                description=(
+                    "Password authentication is enabled for SSH. This increases "
+                    "exposure to brute-force and credential stuffing attacks."
+                ),
+                evidence=[f"PasswordAuthentication {config.password_authentication}"],
+                recommendation="Disable SSH password authentication and use key-based login.",
+                mitre=["T1110"],
+            ))
