@@ -118,3 +118,20 @@ class UserCollector(BaseCollector):
                     "raw": line,
                 })
         return logins
+
+    def collect_lastlog(self) -> dict[str, str]:
+        """Collect lastlog entries for all users."""
+        output = self.safe_run_command(["lastlog"])
+        if output is None:
+            return {}
+        lastlog: dict[str, str] = {}
+        for line in output.splitlines()[1:]:  # skip header
+            parts = line.split()
+            if not parts:
+                continue
+            username = parts[0]
+            if "**Never logged in**" in line:
+                lastlog[username] = "never"
+            else:
+                lastlog[username] = " ".join(parts[1:])
+        return lastlog
