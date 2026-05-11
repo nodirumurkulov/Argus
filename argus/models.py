@@ -78,3 +78,12 @@ class SystemdService(BaseModel):
     exec_start: str = ""
     user: str = ""
     writable: bool = False
+
+
+class PackageInfo(BaseModel):
+    """An installed system package."""
+
+    name: str
+    version: str
+    architecture: str = ""
+    description: str = ""
