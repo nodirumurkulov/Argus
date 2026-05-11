@@ -45,3 +45,14 @@ class UserInfo(BaseModel):
     sudo_access: bool = False
     sudo_nopasswd: bool = False
     last_login: str | None = None
+
+
+class NetworkConnection(BaseModel):
+    """A listening network connection/port."""
+
+    protocol: str = Field(description="tcp, udp, tcp6, udp6")
+    local_address: str
+    local_port: int
+    state: str = "LISTEN"
+    process_name: str | None = None
+    pid: int | None = None
