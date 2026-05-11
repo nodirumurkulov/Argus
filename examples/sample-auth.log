@@ -1,0 +1,31 @@
+May 10 08:14:01 server CRON[12345]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+May 10 08:14:01 server CRON[12345]: pam_unix(cron:session): session closed for user root
+May 10 09:22:13 server sshd[23456]: Failed password for root from 192.168.1.100 port 45678 ssh2
+May 10 09:22:15 server sshd[23456]: Failed password for root from 192.168.1.100 port 45678 ssh2
+May 10 09:22:17 server sshd[23456]: Failed password for root from 192.168.1.100 port 45678 ssh2
+May 10 09:22:19 server sshd[23456]: Failed password for root from 192.168.1.100 port 45678 ssh2
+May 10 09:22:21 server sshd[23456]: Failed password for root from 192.168.1.100 port 45678 ssh2
+May 10 09:22:23 server sshd[23456]: Accepted password for root from 192.168.1.100 port 45678 ssh2
+May 10 09:22:23 server sshd[23456]: pam_unix(sshd:session): session opened for user root(uid=0) by (uid=0)
+May 10 10:01:44 server sshd[34567]: Failed password for invalid user admin from 10.0.0.50 port 33210 ssh2
+May 10 10:01:46 server sshd[34568]: Failed password for invalid user admin from 10.0.0.50 port 33211 ssh2
+May 10 10:01:48 server sshd[34569]: Failed password for invalid user test from 10.0.0.50 port 33212 ssh2
+May 10 10:01:50 server sshd[34570]: Failed password for invalid user user from 10.0.0.50 port 33213 ssh2
+May 10 10:01:52 server sshd[34571]: Failed password for invalid user guest from 10.0.0.50 port 33214 ssh2
+May 10 10:01:54 server sshd[34572]: Failed password for invalid user oracle from 10.0.0.50 port 33215 ssh2
+May 10 10:15:33 server sudo:  deploy : TTY=pts/0 ; PWD=/home/deploy ; USER=root ; COMMAND=/bin/bash
+May 10 10:15:33 server sudo: pam_unix(sudo:session): session opened for user root(uid=0) by deploy(uid=1001)
+May 10 11:30:22 server useradd[45678]: new user: name=backdoor, UID=1005, GID=1005, home=/home/backdoor, shell=/bin/bash
+May 10 11:30:22 server passwd[45679]: pam_unix(passwd:chauthtok): password changed for backdoor
+May 10 12:00:01 server CRON[56789]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+May 10 12:00:01 server CRON[56789]: pam_unix(cron:session): session closed for user root
+May 10 14:22:11 server sshd[67890]: Failed password for deploy from 172.16.0.5 port 50000 ssh2
+May 10 14:22:13 server sshd[67890]: Failed password for deploy from 172.16.0.5 port 50000 ssh2
+May 10 14:22:15 server sshd[67890]: Failed password for deploy from 172.16.0.5 port 50000 ssh2
+May 10 14:22:17 server sshd[67890]: Accepted password for deploy from 172.16.0.5 port 50000 ssh2
+May 10 14:22:17 server sshd[67890]: pam_unix(sshd:session): session opened for user deploy(uid=1001) by (uid=0)
+May 10 15:05:00 server sudo: deploy : 3 incorrect password attempts ; TTY=pts/1 ; PWD=/home/deploy ; USER=root ; COMMAND=/usr/bin/apt install nmap
+May 10 16:00:01 server CRON[78901]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+May 10 16:00:01 server CRON[78901]: pam_unix(cron:session): session closed for user root
+May 10 18:45:02 server sshd[89012]: Accepted publickey for admin from 192.168.1.200 port 60000 ssh2
+May 10 18:45:02 server sshd[89012]: pam_unix(sshd:session): session opened for user admin(uid=1000) by (uid=0)
