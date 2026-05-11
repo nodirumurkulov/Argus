@@ -11,7 +11,7 @@ app = typer.Typer(
     name="argus",
     help="ARGUS - Offline AI Defensive Security Assistant",
     add_completion=False,
-    no_args_is_help=True,
+    no_args_is_help=False,
 )
 
 console = Console()
