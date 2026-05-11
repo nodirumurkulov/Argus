@@ -182,3 +182,20 @@ def generate_rule(
         raise typer.Exit(code=1)
     console.print(f"[bold cyan]ARGUS Rule Generation:[/bold cyan] {type}")
     console.print("[dim]This command will be fully implemented in a future update.[/dim]")
+
+
+@app.command()
+def report(
+    input: Annotated[str, typer.Option("--input", "-i",
+                     help="Input findings JSON file.")] = "",
+    format: Annotated[str, typer.Option("--format", "-f",
+                      help="Output format: markdown or json.")] = "markdown",
+    output: Annotated[str | None, typer.Option("--output", "-o",
+                      help="Output file path.")] = None,
+) -> None:
+    """Generate security reports from findings.
+
+    Supports Markdown and JSON output formats.
+    """
+    console.print("[bold cyan]ARGUS Report Generation[/bold cyan]")
+    console.print("[dim]This command will be fully implemented in a future update.[/dim]")
