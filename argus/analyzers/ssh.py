@@ -20,6 +20,7 @@ class SSHAnalyzer(BaseAnalyzer):
         self._check_x11_forwarding(ssh_config, findings)
         self._check_max_auth_tries(ssh_config, findings)
         self._check_weak_ciphers(ssh_config, findings)
+        self._check_nonstandard_port(ssh_config, findings)
         return findings
 
     def _check_root_login(
@@ -155,4 +156,21 @@ class SSHAnalyzer(BaseAnalyzer):
                 evidence=[f"Cipher: {c}" for c in found_weak],
                 recommendation="Remove weak ciphers. Use aes256-gcm, chacha20-poly1305.",
                 mitre=["T1040"],
+            ))
+
+    def _check_nonstandard_port(
+        self, config: SSHConfig, findings: list[Finding]
+    ) -> None:
+        """Note if SSH is on a non-standard port (informational)."""
+        if config.port != 22 and config.port != 0:
+            findings.append(self._make_finding(
+                finding_id="ARGUS-SSH-008",
+                title=f"SSH running on non-standard port {config.port}",
+                severity="info",
+                description=(
+                    f"SSH is configured to listen on port {config.port} instead of 22. "
+                    "This provides minor obscurity but is not a security control."
+                ),
+                evidence=[f"Port {config.port}"],
+                recommendation="Non-standard ports offer limited security. Use proper hardening.",
             ))
