@@ -42,6 +42,7 @@ class SSHCollector(BaseCollector):
         )
         self._parse_port_and_address(config, config_dict)
         self._parse_crypto_settings(config, config_dict)
+        self._parse_auth_limits(config, config_dict)
         return config
 
     def _parse_port_and_address(
@@ -65,3 +66,20 @@ class SSHCollector(BaseCollector):
         kex_str = config_dict.get("kexalgorithms", "")
         if kex_str:
             config.kex_algorithms = [k.strip() for k in kex_str.split(",")]
+
+    def _parse_auth_limits(
+        self, config: SSHConfig, config_dict: dict[str, str]
+    ) -> None:
+        """Extract MaxAuthTries, LoginGraceTime, and X11Forwarding."""
+        max_auth = config_dict.get("maxauthtries", "6")
+        try:
+            config.max_auth_tries = int(max_auth)
+        except ValueError:
+            config.max_auth_tries = 6
+        grace_time = config_dict.get("logingracetime", "120")
+        try:
+            config.login_grace_time = int(grace_time)
+        except ValueError:
+            config.login_grace_time = 120
+        config.x11_forwarding = config_dict.get("x11forwarding", "unknown")
+        config.protocol = config_dict.get("protocol", "")
