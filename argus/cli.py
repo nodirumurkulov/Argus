@@ -105,3 +105,22 @@ def scan_host(
     """
     console.print("[bold cyan]ARGUS Host Security Scan[/bold cyan]")
     console.print("[dim]This command will be fully implemented in a future update.[/dim]")
+
+
+@app.command()
+def analyze_logs(
+    log_file: Annotated[str, typer.Argument(help="Path to log file to analyze.")],
+    output: Annotated[str | None, typer.Option("--output", "-o",
+                      help="Output file path.")] = None,
+    format: Annotated[str, typer.Option("--format", "-f",
+                      help="Output format: markdown or json.")] = "markdown",
+    no_llm: Annotated[bool, typer.Option("--no-llm",
+                      help="Skip LLM enrichment.")] = False,
+) -> None:
+    """Analyze Linux authentication and system logs.
+
+    Detects brute-force attempts, password spraying, suspicious logins,
+    sudo abuse, and more.
+    """
+    console.print(f"[bold cyan]ARGUS Log Analysis:[/bold cyan] {log_file}")
+    console.print("[dim]This command will be fully implemented in a future update.[/dim]")
