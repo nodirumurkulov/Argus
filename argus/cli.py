@@ -158,3 +158,27 @@ def investigate(
         raise typer.Exit(code=1)
     console.print(f"[bold cyan]ARGUS Investigation:[/bold cyan] {case}")
     console.print("[dim]This command will be fully implemented in a future update.[/dim]")
+
+
+RULE_TYPES = ["sigma", "auditd", "yara", "suricata"]
+
+
+@app.command()
+def generate_rule(
+    type: Annotated[str, typer.Option("--type", "-t",
+                    help="Rule type: sigma, auditd, yara, suricata.")] = "sigma",
+    scenario: Annotated[str | None, typer.Option("--scenario", "-s",
+                        help="Scenario name, e.g. ssh-bruteforce.")] = None,
+    from_file: Annotated[str | None, typer.Option("--from",
+                         help="Generate rules from findings JSON file.")] = None,
+) -> None:
+    """Generate defensive detection rules.
+
+    Supported types: Sigma, auditd, YARA, Suricata.
+    """
+    if type not in RULE_TYPES:
+        console.print(f"[bold red]Unknown rule type:[/bold red] {type}")
+        console.print(f"[dim]Available: {', '.join(RULE_TYPES)}[/dim]")
+        raise typer.Exit(code=1)
+    console.print(f"[bold cyan]ARGUS Rule Generation:[/bold cyan] {type}")
+    console.print("[dim]This command will be fully implemented in a future update.[/dim]")
