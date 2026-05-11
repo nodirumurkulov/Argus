@@ -1,5 +1,8 @@
 """Rich terminal output rendering for ARGUS findings."""
 
+import json
+from pathlib import Path
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -136,3 +139,22 @@ def render_finding_detail(finding: Finding) -> None:
         "\n".join(content_parts),
         border_style=color,
     ))
+
+
+def write_json_output(findings: list[Finding], output_path: str) -> None:
+    """Write findings to a JSON file."""
+    data = {
+        "findings": [f.model_dump() for f in findings],
+        "summary": {
+            "total": len(findings),
+            "critical": sum(1 for f in findings if f.severity == SeverityLevel.CRITICAL),
+            "high": sum(1 for f in findings if f.severity == SeverityLevel.HIGH),
+            "medium": sum(1 for f in findings if f.severity == SeverityLevel.MEDIUM),
+            "low": sum(1 for f in findings if f.severity == SeverityLevel.LOW),
+            "info": sum(1 for f in findings if f.severity == SeverityLevel.INFO),
+        },
+    }
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2, default=str))
+    console.print(f"\n[green]JSON output written to:[/green] {output_path}")
