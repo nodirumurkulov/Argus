@@ -36,6 +36,7 @@ class NetworkAnalyzer(BaseAnalyzer):
         findings: list[Finding] = []
         self._check_wildcard_listeners(connections, findings)
         self._check_risky_ports(connections, findings)
+        self._check_database_exposure(connections, findings)
         return findings
 
     def _check_wildcard_listeners(
@@ -92,3 +93,37 @@ class NetworkAnalyzer(BaseAnalyzer):
                         recommendation=f"Restrict access to port {conn.local_port} via firewall.",
                         mitre=["T1071"],
                     ))
+
+    def _check_database_exposure(
+        self, connections: list[NetworkConnection], findings: list[Finding]
+    ) -> None:
+        """Check for database services exposed to all interfaces."""
+        db_ports = {
+            3306: "MySQL",
+            5432: "PostgreSQL",
+            6379: "Redis",
+            27017: "MongoDB",
+            9200: "Elasticsearch",
+            1433: "MSSQL",
+        }
+        for conn in connections:
+            if (
+                conn.local_port in db_ports
+                and conn.local_address in ("0.0.0.0", "*", "[::]", "::")
+            ):
+                db_name = db_ports[conn.local_port]
+                findings.append(self._make_finding(
+                    finding_id=f"ARGUS-NET-003-{conn.local_port}",
+                    title=f"{db_name} exposed on all interfaces",
+                    severity="high",
+                    description=(
+                        f"{db_name} on port {conn.local_port} is listening on all "
+                        "interfaces. Databases should only be accessible locally."
+                    ),
+                    evidence=[
+                        f"Service: {db_name}",
+                        f"Address: {conn.local_address}:{conn.local_port}",
+                    ],
+                    recommendation=f"Bind {db_name} to 127.0.0.1 and use SSH tunneling.",
+                    mitre=["T1190"],
+                ))
