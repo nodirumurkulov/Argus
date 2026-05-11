@@ -124,3 +124,37 @@ def analyze_logs(
     """
     console.print(f"[bold cyan]ARGUS Log Analysis:[/bold cyan] {log_file}")
     console.print("[dim]This command will be fully implemented in a future update.[/dim]")
+
+
+INVESTIGATION_CASES = [
+    "ssh-compromise",
+    "suspicious-user",
+    "web-shell",
+    "crypto-miner",
+    "privilege-escalation",
+    "persistence",
+]
+
+
+@app.command()
+def investigate(
+    case: Annotated[str, typer.Option("--case", "-c",
+                    help="Investigation case type.")] = "",
+) -> None:
+    """Run guided incident investigation and triage.
+
+    Supported cases: ssh-compromise, suspicious-user, web-shell,
+    crypto-miner, privilege-escalation, persistence.
+    """
+    if not case:
+        console.print("[bold cyan]Available investigation cases:[/bold cyan]")
+        for c in INVESTIGATION_CASES:
+            console.print(f"  [cyan]◉[/cyan]  {c}")
+        console.print("\n[dim]Usage: argus investigate --case ssh-compromise[/dim]")
+        return
+    if case not in INVESTIGATION_CASES:
+        console.print(f"[bold red]Unknown case:[/bold red] {case}")
+        console.print(f"[dim]Available: {', '.join(INVESTIGATION_CASES)}[/dim]")
+        raise typer.Exit(code=1)
+    console.print(f"[bold cyan]ARGUS Investigation:[/bold cyan] {case}")
+    console.print("[dim]This command will be fully implemented in a future update.[/dim]")
