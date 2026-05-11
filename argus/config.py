@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import yaml
 from pydantic import BaseModel, Field
 
 
@@ -36,3 +37,13 @@ class ArgusConfig(BaseModel):
     output: OutputConfig = Field(default_factory=OutputConfig)
     scan_timeout: int = 300
     log_level: str = "info"
+
+
+def load_config(config_path: Path | None = None) -> ArgusConfig:
+    """Load configuration from YAML file. Returns defaults if file doesn't exist."""
+    path = config_path or DEFAULT_CONFIG_PATH
+    if path.exists():
+        with open(path) as f:
+            data = yaml.safe_load(f) or {}
+        return ArgusConfig(**data)
+    return ArgusConfig()
