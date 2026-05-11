@@ -109,6 +109,7 @@ def scan_host(
     from argus.collectors.aggregator import collect_host_data
     from argus.output import (
         render_findings_table,
+        render_host_info,
         render_recommendations,
         render_summary_panel,
         write_json_output,
@@ -121,6 +122,13 @@ def scan_host(
 
     console.print("[bold]Collecting host data...[/bold]\n")
     host_data = collect_host_data(verbose=verbose)
+
+    render_host_info(
+        hostname=host_data.hostname,
+        os_release=host_data.os_release,
+        kernel_version=host_data.kernel_version,
+        uptime=host_data.uptime,
+    )
 
     console.print("\n[bold]Analyzing security posture...[/bold]\n")
     findings = run_all_analyzers(host_data, verbose=verbose)

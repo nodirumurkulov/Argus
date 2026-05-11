@@ -141,6 +141,27 @@ def render_finding_detail(finding: Finding) -> None:
     ))
 
 
+def render_host_info(
+    hostname: str,
+    os_release: str,
+    kernel_version: str,
+    uptime: str,
+) -> None:
+    """Render host information panel."""
+    info_lines = [
+        f"[bold]Hostname:[/bold]   {hostname}",
+        f"[bold]OS:[/bold]         {os_release}",
+        f"[bold]Kernel:[/bold]     {kernel_version}",
+        f"[bold]Uptime:[/bold]     {uptime}",
+    ]
+    console.print(Panel(
+        "\n".join(info_lines),
+        title="[bold]Host Information[/bold]",
+        border_style="dim",
+        padding=(0, 2),
+    ))
+
+
 def write_json_output(findings: list[Finding], output_path: str) -> None:
     """Write findings to a JSON file."""
     data = {
