@@ -11,6 +11,7 @@ from argus.collectors.packages import PackageCollector
 from argus.collectors.persistence import PersistenceCollector
 from argus.collectors.ssh import SSHCollector
 from argus.collectors.sudo import SudoCollector
+from argus.collectors.systemd import SystemdCollector
 from argus.collectors.users import UserCollector
 from argus.models import HostData
 
