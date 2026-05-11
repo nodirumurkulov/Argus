@@ -77,3 +77,24 @@ class UserCollector(BaseCollector):
             if len(parts) >= 2:
                 shadow[parts[0]] = parts[1]
         return shadow
+
+    def _enrich_users(
+        self,
+        users: list[UserInfo],
+        groups: dict[str, list[str]],
+        shadow: dict[str, str],
+    ) -> None:
+        """Enrich user records with group membership and password status."""
+        nologin_shells = {"/usr/sbin/nologin", "/bin/false", "/sbin/nologin"}
+        for user in users:
+            user.groups = groups.get(user.username, [])
+            pwd_field = shadow.get(user.username, "")
+            if pwd_field == "":
+                user.password_empty = True
+                user.has_password = False
+            elif pwd_field.startswith("!") or pwd_field.startswith("*"):
+                user.has_password = False
+            else:
+                user.has_password = True
+            if user.shell not in nologin_shells:
+                pass  # has a login shell — analyzers will check this
