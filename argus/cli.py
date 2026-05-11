@@ -97,14 +97,45 @@ def scan_host(
                       help="Output format: markdown or json.")] = "markdown",
     no_llm: Annotated[bool, typer.Option("--no-llm",
                       help="Skip LLM enrichment.")] = False,
+    verbose: Annotated[bool, typer.Option("--verbose",
+                       help="Show detailed output.")] = False,
 ) -> None:
     """Scan local host security posture.
 
     Collects and analyzes SSH config, users, sudo, network, cron, systemd,
     firewall, and persistence data.
     """
-    console.print("[bold cyan]ARGUS Host Security Scan[/bold cyan]")
-    console.print("[dim]This command will be fully implemented in a future update.[/dim]")
+    from argus.analyzers.engine import run_all_analyzers
+    from argus.collectors.aggregator import collect_host_data
+    from argus.output import (
+        render_findings_table,
+        render_recommendations,
+        render_summary_panel,
+        write_json_output,
+    )
+
+    console.print("\n[bold cyan]╭────────────────────────────────────────────╮[/bold cyan]")
+    console.print("[bold cyan]│[/bold cyan] [bold]ARGUS Host Security Scan[/bold]                   [bold cyan]│[/bold cyan]")
+    console.print("[bold cyan]│[/bold cyan] [dim]Offline AI Defensive Security Assistant[/dim]    [bold cyan]│[/bold cyan]")
+    console.print("[bold cyan]╰────────────────────────────────────────────╯[/bold cyan]\n")
+
+    console.print("[bold]Collecting host data...[/bold]\n")
+    host_data = collect_host_data(verbose=verbose)
+
+    console.print("\n[bold]Analyzing security posture...[/bold]\n")
+    findings = run_all_analyzers(host_data, verbose=verbose)
+
+    render_findings_table(findings)
+    render_summary_panel(findings, hostname=host_data.hostname)
+    render_recommendations(findings)
+
+    if output:
+        if format == "json":
+            write_json_output(findings, output)
+        else:
+            console.print(f"\n[green]Report written to:[/green] {output}")
+
+    console.print("[dim]Scan complete.[/dim]\n")
 
 
 @app.command()
