@@ -212,3 +212,16 @@ def config_init() -> None:
     except FileExistsError:
         console.print(f"[bold yellow]Config already exists:[/bold yellow] {DEFAULT_CONFIG_PATH}")
         console.print("[dim]Delete it first if you want to regenerate.[/dim]")
+
+
+@config_app.command("show")
+def config_show() -> None:
+    """Display current ARGUS configuration."""
+    import yaml
+
+    from argus.config import DEFAULT_CONFIG_PATH, load_config
+
+    config = load_config()
+    console.print(f"[bold cyan]ARGUS Configuration[/bold cyan] [dim]({DEFAULT_CONFIG_PATH})[/dim]\n")
+    config_yaml = yaml.dump(config.model_dump(), default_flow_style=False, sort_keys=False)
+    console.print(f"[white]{config_yaml}[/white]")
