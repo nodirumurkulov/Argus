@@ -40,4 +40,16 @@ class SSHCollector(BaseCollector):
         config.permit_empty_passwords = config_dict.get(
             "permitemptypasswords", "unknown"
         )
+        self._parse_port_and_address(config, config_dict)
         return config
+
+    def _parse_port_and_address(
+        self, config: SSHConfig, config_dict: dict[str, str]
+    ) -> None:
+        """Extract Port and ListenAddress settings."""
+        port_str = config_dict.get("port", "22")
+        try:
+            config.port = int(port_str)
+        except ValueError:
+            config.port = 22
+        config.listen_address = config_dict.get("listenaddress", "")
