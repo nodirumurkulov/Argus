@@ -36,6 +36,7 @@ class AuthLogAnalyzer(BaseAnalyzer):
         self._check_sudo_failures(log_lines, findings)
         self._check_root_login(log_lines, findings)
         self._check_multiple_source_ips(log_lines, findings)
+        self._check_invalid_users(log_lines, findings)
         return findings
 
     def _check_brute_force(
@@ -217,3 +218,33 @@ class AuthLogAnalyzer(BaseAnalyzer):
                     recommendation=f"Verify all login sources for '{user}' are authorized.",
                     mitre=["T1078"],
                 ))
+
+    def _check_invalid_users(
+        self, lines: list[str], findings: list[Finding]
+    ) -> None:
+        """Detect login attempts targeting non-existent users."""
+        invalid_re = re.compile(
+            r"Failed password for invalid user (\S+) from (\S+)"
+        )
+        invalid_users: Counter[str] = Counter()
+        for line in lines:
+            match = invalid_re.search(line)
+            if match:
+                invalid_users[match.group(1)] += 1
+
+        if len(invalid_users) >= 5:
+            findings.append(self._make_finding(
+                finding_id="ARGUS-AUTH-008",
+                title=f"Login attempts for {len(invalid_users)} non-existent users",
+                severity="medium",
+                description=(
+                    f"Detected login attempts targeting {len(invalid_users)} users "
+                    f"that do not exist: {', '.join(list(invalid_users.keys())[:10])}"
+                ),
+                evidence=[
+                    f"{user}: {count} attempts"
+                    for user, count in invalid_users.most_common(10)
+                ],
+                recommendation="Review source IPs and consider blocking.",
+                mitre=["T1110"],
+            ))
