@@ -56,3 +56,12 @@ class NetworkConnection(BaseModel):
     state: str = "LISTEN"
     process_name: str | None = None
     pid: int | None = None
+
+
+class CronEntry(BaseModel):
+    """A cron job entry."""
+
+    user: str
+    schedule: str
+    command: str
+    source_file: str = ""
