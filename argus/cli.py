@@ -199,3 +199,16 @@ def report(
     """
     console.print("[bold cyan]ARGUS Report Generation[/bold cyan]")
     console.print("[dim]This command will be fully implemented in a future update.[/dim]")
+
+
+@config_app.command("init")
+def config_init() -> None:
+    """Initialize default ARGUS configuration file."""
+    from argus.config import DEFAULT_CONFIG_PATH, generate_default_config
+
+    try:
+        path = generate_default_config()
+        console.print(f"[bold green]Config created:[/bold green] {path}")
+    except FileExistsError:
+        console.print(f"[bold yellow]Config already exists:[/bold yellow] {DEFAULT_CONFIG_PATH}")
+        console.print("[dim]Delete it first if you want to regenerate.[/dim]")
