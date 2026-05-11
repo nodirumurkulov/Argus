@@ -33,3 +33,28 @@ class FirewallCollector(BaseCollector):
                 if "ALLOW" in line or "DENY" in line or "REJECT" in line:
                     status.rules.append(line)
         return status
+
+    def _collect_iptables(self) -> FirewallStatus:
+        """Collect firewall rules from iptables as fallback."""
+        output = self.safe_run_command(["iptables", "-S"])
+        if output is None:
+            return FirewallStatus()
+        rules = [
+            line.strip()
+            for line in output.splitlines()
+            if line.strip() and not line.strip().startswith("#")
+        ]
+        has_rules = any(
+            rule for rule in rules if not rule.startswith("-P")
+        )
+        default_policy = ""
+        for rule in rules:
+            if rule.startswith("-P INPUT"):
+                default_policy = rule.split()[-1] if len(rule.split()) >= 3 else ""
+                break
+        return FirewallStatus(
+            active=has_rules or bool(rules),
+            backend="iptables",
+            rules=rules,
+            default_policy=default_policy,
+        )
