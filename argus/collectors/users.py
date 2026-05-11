@@ -98,3 +98,23 @@ class UserCollector(BaseCollector):
                 user.has_password = True
             if user.shell not in nologin_shells:
                 pass  # has a login shell — analyzers will check this
+
+    def collect_last_logins(self) -> list[dict[str, str]]:
+        """Collect recent login history using the last command."""
+        output = self.safe_run_command(["last", "-n", "50", "--time-format", "iso"])
+        if output is None:
+            return []
+        logins: list[dict[str, str]] = []
+        for line in output.splitlines():
+            line = line.strip()
+            if not line or line.startswith("wtmp") or line.startswith("reboot"):
+                continue
+            parts = line.split()
+            if len(parts) >= 3:
+                logins.append({
+                    "user": parts[0],
+                    "terminal": parts[1],
+                    "source": parts[2] if len(parts) > 2 else "",
+                    "raw": line,
+                })
+        return logins
