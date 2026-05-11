@@ -84,3 +84,30 @@ def render_summary_panel(findings: list[Finding], hostname: str = "") -> None:
         border_style="cyan",
         padding=(1, 2),
     ))
+
+
+def render_recommendations(findings: list[Finding]) -> None:
+    """Render prioritized remediation recommendations."""
+    actionable = [
+        f for f in findings
+        if f.recommendation and f.severity in (
+            SeverityLevel.CRITICAL, SeverityLevel.HIGH, SeverityLevel.MEDIUM,
+        )
+    ]
+    if not actionable:
+        return
+
+    sorted_findings = sorted(
+        actionable,
+        key=lambda f: list(SeverityLevel).index(f.severity),
+    )
+
+    console.print("\n[bold]Recommended Next Steps[/bold]")
+    console.print()
+    for i, finding in enumerate(sorted_findings[:10], 1):
+        color = SEVERITY_COLORS.get(finding.severity, "white")
+        console.print(
+            f"  {i}. [{color}]{finding.severity.value.upper()}[/{color}] "
+            f"{finding.recommendation}"
+        )
+    console.print()
