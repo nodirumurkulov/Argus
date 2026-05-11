@@ -41,3 +41,24 @@ class UserCollector(BaseCollector):
                 shell=parts[6],
             ))
         return users
+
+    def _parse_groups(self) -> dict[str, list[str]]:
+        """Parse /etc/group to map usernames to their groups."""
+        raw = self.safe_read_file("/etc/group")
+        if raw is None:
+            return {}
+        user_groups: dict[str, list[str]] = {}
+        for line in raw.splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = line.split(":")
+            if len(parts) < 4:
+                continue
+            group_name = parts[0]
+            members = parts[3].split(",") if parts[3] else []
+            for member in members:
+                member = member.strip()
+                if member:
+                    user_groups.setdefault(member, []).append(group_name)
+        return user_groups
