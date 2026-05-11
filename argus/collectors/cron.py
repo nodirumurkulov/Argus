@@ -90,3 +90,25 @@ class CronCollector(BaseCollector):
                             ))
         except PermissionError:
             pass
+
+    def get_suspicious_entries(self) -> list[CronEntry]:
+        """Return cron entries with suspicious commands."""
+        suspicious_patterns = [
+            "curl ", "wget ", "nc ", "ncat ",
+            "/dev/tcp/", "base64", "eval ",
+            "python -c", "python3 -c", "bash -i",
+            "nohup ", "/tmp/", "chmod 777",
+            "reverse", "shell", "backdoor",
+        ]
+        entries = self.collect()
+        suspicious: list[CronEntry] = []
+        for entry in entries:
+            cmd_lower = entry.command.lower()
+            if any(p in cmd_lower for p in suspicious_patterns):
+                suspicious.append(entry)
+        return suspicious
+
+    def get_root_cron_entries(self) -> list[CronEntry]:
+        """Return all cron entries running as root."""
+        entries = self.collect()
+        return [e for e in entries if e.user == "root"]
