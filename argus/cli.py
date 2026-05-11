@@ -162,8 +162,52 @@ def analyze_logs(
     Detects brute-force attempts, password spraying, suspicious logins,
     sudo abuse, and more.
     """
-    console.print(f"[bold cyan]ARGUS Log Analysis:[/bold cyan] {log_file}")
-    console.print("[dim]This command will be fully implemented in a future update.[/dim]")
+    from pathlib import Path
+
+    from argus.analyzers.auth_logs import AuthLogAnalyzer
+    from argus.collectors.logs import LogCollector
+    from argus.output import (
+        render_findings_table,
+        render_recommendations,
+        render_summary_panel,
+        write_json_output,
+        write_markdown_output,
+    )
+
+    console.print("\n[bold cyan]╭────────────────────────────────────────────╮[/bold cyan]")
+    console.print("[bold cyan]│[/bold cyan] [bold]ARGUS Log Analysis[/bold]                        [bold cyan]│[/bold cyan]")
+    console.print("[bold cyan]│[/bold cyan] [dim]Offline AI Defensive Security Assistant[/dim]    [bold cyan]│[/bold cyan]")
+    console.print("[bold cyan]╰────────────────────────────────────────────╯[/bold cyan]\n")
+
+    log_path = Path(log_file)
+    if not log_path.is_file():
+        console.print(f"[bold red]Error:[/bold red] Log file not found: {log_file}")
+        raise typer.Exit(code=1)
+
+    console.print(f"[bold]Analyzing:[/bold] {log_file}\n")
+    collector = LogCollector()
+    log_lines = collector._read_log(str(log_path))
+
+    if not log_lines:
+        console.print("[yellow]No log entries found.[/yellow]")
+        raise typer.Exit()
+
+    console.print(f"  [green]✓[/green] Read {len(log_lines)} log entries\n")
+
+    analyzer = AuthLogAnalyzer()
+    findings = analyzer.analyze(log_lines)
+
+    render_findings_table(findings)
+    render_summary_panel(findings)
+    render_recommendations(findings)
+
+    if output:
+        if format == "json":
+            write_json_output(findings, output)
+        else:
+            write_markdown_output(findings, output)
+
+    console.print("[dim]Analysis complete.[/dim]\n")
 
 
 INVESTIGATION_CASES = [
