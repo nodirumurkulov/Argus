@@ -87,3 +87,47 @@ class PackageInfo(BaseModel):
     version: str
     architecture: str = ""
     description: str = ""
+
+
+class SSHConfig(BaseModel):
+    """Parsed SSH server configuration."""
+
+    permit_root_login: str = "unknown"
+    password_authentication: str = "unknown"
+    permit_empty_passwords: str = "unknown"
+    port: int = 22
+    listen_address: str = ""
+    max_auth_tries: int = 6
+    login_grace_time: int = 120
+    ciphers: list[str] = Field(default_factory=list)
+    kex_algorithms: list[str] = Field(default_factory=list)
+    protocol: str = ""
+    x11_forwarding: str = "unknown"
+    raw_config: dict[str, str] = Field(default_factory=dict)
+
+
+class FirewallStatus(BaseModel):
+    """Firewall status information."""
+
+    active: bool = False
+    backend: str = ""
+    rules: list[str] = Field(default_factory=list)
+    default_policy: str = ""
+
+
+class HostData(BaseModel):
+    """Aggregated host security data from all collectors."""
+
+    hostname: str = ""
+    kernel_version: str = ""
+    os_release: str = ""
+    uptime: str = ""
+    ssh_config: SSHConfig = Field(default_factory=SSHConfig)
+    users: list[UserInfo] = Field(default_factory=list)
+    network_connections: list[NetworkConnection] = Field(default_factory=list)
+    cron_entries: list[CronEntry] = Field(default_factory=list)
+    systemd_services: list[SystemdService] = Field(default_factory=list)
+    packages: list[PackageInfo] = Field(default_factory=list)
+    firewall: FirewallStatus = Field(default_factory=FirewallStatus)
+    sysctl_settings: dict[str, str] = Field(default_factory=dict)
+    persistence_locations: list[str] = Field(default_factory=list)
