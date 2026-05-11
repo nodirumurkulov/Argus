@@ -1,5 +1,6 @@
 """ARGUS security analyzers for detecting misconfigurations and threats."""
 
+from argus.analyzers.auth_logs import AuthLogAnalyzer
 from argus.analyzers.cron import CronAnalyzer
 from argus.analyzers.firewall import FirewallAnalyzer
 from argus.analyzers.kernel import KernelAnalyzer
@@ -12,6 +13,7 @@ from argus.analyzers.systemd import SystemdAnalyzer
 from argus.analyzers.users import UserAnalyzer
 
 __all__ = [
+    "AuthLogAnalyzer",
     "CronAnalyzer",
     "FirewallAnalyzer",
     "KernelAnalyzer",
