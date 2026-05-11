@@ -41,6 +41,7 @@ class SSHCollector(BaseCollector):
             "permitemptypasswords", "unknown"
         )
         self._parse_port_and_address(config, config_dict)
+        self._parse_crypto_settings(config, config_dict)
         return config
 
     def _parse_port_and_address(
@@ -53,3 +54,14 @@ class SSHCollector(BaseCollector):
         except ValueError:
             config.port = 22
         config.listen_address = config_dict.get("listenaddress", "")
+
+    def _parse_crypto_settings(
+        self, config: SSHConfig, config_dict: dict[str, str]
+    ) -> None:
+        """Extract cipher and key exchange algorithm settings."""
+        ciphers_str = config_dict.get("ciphers", "")
+        if ciphers_str:
+            config.ciphers = [c.strip() for c in ciphers_str.split(",")]
+        kex_str = config_dict.get("kexalgorithms", "")
+        if kex_str:
+            config.kex_algorithms = [k.strip() for k in kex_str.split(",")]
