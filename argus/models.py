@@ -1,5 +1,6 @@
 """ARGUS data models for findings, reports, and host data."""
 
+from datetime import datetime
 from enum import Enum
 
 from pydantic import BaseModel, Field
@@ -131,3 +132,37 @@ class HostData(BaseModel):
     firewall: FirewallStatus = Field(default_factory=FirewallStatus)
     sysctl_settings: dict[str, str] = Field(default_factory=dict)
     persistence_locations: list[str] = Field(default_factory=list)
+
+
+class Report(BaseModel):
+    """A complete ARGUS security report."""
+
+    title: str = "ARGUS Security Report"
+    generated_at: datetime = Field(default_factory=datetime.now)
+    hostname: str = ""
+    scan_type: str = ""
+    findings: list[Finding] = Field(default_factory=list)
+    executive_summary: str = ""
+    recommended_actions: list[str] = Field(default_factory=list)
+    detection_rules: list[str] = Field(default_factory=list)
+    mitre_techniques: list[str] = Field(default_factory=list)
+
+    @property
+    def critical_count(self) -> int:
+        return sum(1 for f in self.findings if f.severity == SeverityLevel.CRITICAL)
+
+    @property
+    def high_count(self) -> int:
+        return sum(1 for f in self.findings if f.severity == SeverityLevel.HIGH)
+
+    @property
+    def medium_count(self) -> int:
+        return sum(1 for f in self.findings if f.severity == SeverityLevel.MEDIUM)
+
+    @property
+    def low_count(self) -> int:
+        return sum(1 for f in self.findings if f.severity == SeverityLevel.LOW)
+
+    @property
+    def info_count(self) -> int:
+        return sum(1 for f in self.findings if f.severity == SeverityLevel.INFO)
