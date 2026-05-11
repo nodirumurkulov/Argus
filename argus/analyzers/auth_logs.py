@@ -35,6 +35,7 @@ class AuthLogAnalyzer(BaseAnalyzer):
         self._check_new_users(log_lines, findings)
         self._check_sudo_failures(log_lines, findings)
         self._check_root_login(log_lines, findings)
+        self._check_multiple_source_ips(log_lines, findings)
         return findings
 
     def _check_brute_force(
@@ -188,5 +189,31 @@ class AuthLogAnalyzer(BaseAnalyzer):
                     ),
                     evidence=[line.strip()],
                     recommendation="Disable root SSH login. Use sudo instead.",
+                    mitre=["T1078"],
+                ))
+
+    def _check_multiple_source_ips(
+        self, lines: list[str], findings: list[Finding]
+    ) -> None:
+        """Detect users logging in from multiple different IPs."""
+        user_ips: dict[str, set[str]] = {}
+        for line in lines:
+            match = self.ACCEPTED_LOGIN_RE.search(line)
+            if match:
+                user, ip = match.group(1), match.group(2)
+                user_ips.setdefault(user, set()).add(ip)
+
+        for user, ips in user_ips.items():
+            if len(ips) >= 3:
+                findings.append(self._make_finding(
+                    finding_id=f"ARGUS-AUTH-007-{user}",
+                    title=f"User '{user}' logged in from {len(ips)} different IPs",
+                    severity="medium",
+                    description=(
+                        f"User '{user}' has successful logins from {len(ips)} "
+                        f"different source IPs: {', '.join(sorted(ips))}"
+                    ),
+                    evidence=[f"IPs: {', '.join(sorted(ips))}"],
+                    recommendation=f"Verify all login sources for '{user}' are authorized.",
                     mitre=["T1078"],
                 ))
