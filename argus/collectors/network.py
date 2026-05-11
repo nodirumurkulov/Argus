@@ -70,3 +70,22 @@ class NetworkCollector(BaseCollector):
         if proc_match:
             conn.process_name = proc_match.group(1)
             conn.pid = int(proc_match.group(2))
+
+    def get_wildcard_listeners(self) -> list[NetworkConnection]:
+        """Return connections listening on all interfaces (0.0.0.0 or ::)."""
+        connections = self.collect()
+        wildcard = []
+        for conn in connections:
+            addr = conn.local_address
+            if addr in ("0.0.0.0", "*", "[::]", "::"):
+                wildcard.append(conn)
+        return wildcard
+
+    def get_high_risk_ports(self) -> list[NetworkConnection]:
+        """Return connections on commonly targeted ports."""
+        risky_ports = {
+            21, 23, 25, 53, 110, 135, 139, 445, 1433, 1521,
+            3306, 3389, 5432, 5900, 6379, 8080, 8443, 9200, 27017,
+        }
+        connections = self.collect()
+        return [c for c in connections if c.local_port in risky_ports]
