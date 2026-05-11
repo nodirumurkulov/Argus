@@ -62,3 +62,18 @@ class UserCollector(BaseCollector):
                 if member:
                     user_groups.setdefault(member, []).append(group_name)
         return user_groups
+
+    def _parse_shadow(self) -> dict[str, str]:
+        """Parse /etc/shadow for password status. Returns username -> password_field."""
+        raw = self.safe_read_file("/etc/shadow")
+        if raw is None:
+            return {}
+        shadow: dict[str, str] = {}
+        for line in raw.splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = line.split(":")
+            if len(parts) >= 2:
+                shadow[parts[0]] = parts[1]
+        return shadow
