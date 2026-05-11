@@ -10,8 +10,11 @@ class FirewallCollector(BaseCollector):
     name = "firewall"
 
     def collect(self) -> FirewallStatus:
-        """Collect firewall status, trying ufw first then iptables."""
+        """Collect firewall status, trying ufw first then nftables then iptables."""
         status = self._collect_ufw()
+        if status.backend:
+            return status
+        status = self._collect_nftables()
         if status.backend:
             return status
         return self._collect_iptables()
@@ -33,6 +36,24 @@ class FirewallCollector(BaseCollector):
                 if "ALLOW" in line or "DENY" in line or "REJECT" in line:
                     status.rules.append(line)
         return status
+
+    def _collect_nftables(self) -> FirewallStatus:
+        """Collect firewall rules from nftables."""
+        output = self.safe_run_command(["nft", "list", "ruleset"])
+        if output is None:
+            return FirewallStatus()
+        rules = [
+            line.strip()
+            for line in output.splitlines()
+            if line.strip() and not line.strip().startswith("#")
+        ]
+        if not rules:
+            return FirewallStatus()
+        return FirewallStatus(
+            active=bool(rules),
+            backend="nftables",
+            rules=rules[:50],
+        )
 
     def _collect_iptables(self) -> FirewallStatus:
         """Collect firewall rules from iptables as fallback."""
