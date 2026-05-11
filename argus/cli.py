@@ -70,3 +70,20 @@ def version_callback(value: bool) -> None:
     if value:
         console.print(f"[bold cyan]ARGUS[/bold cyan] version [bold]{__version__}[/bold]")
         raise typer.Exit()
+
+
+@app.callback(invoke_without_command=True)
+def main(
+    ctx: typer.Context,
+    version: Annotated[
+        bool,
+        typer.Option("--version", "-v", callback=version_callback, is_eager=True,
+                     help="Show ARGUS version and exit."),
+    ] = False,
+) -> None:
+    """ARGUS - Offline AI Defensive Security Assistant.
+
+    Local-first blue-team analysis for Linux.
+    """
+    if ctx.invoked_subcommand is None:
+        show_banner()
