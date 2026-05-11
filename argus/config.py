@@ -47,3 +47,20 @@ def load_config(config_path: Path | None = None) -> ArgusConfig:
             data = yaml.safe_load(f) or {}
         return ArgusConfig(**data)
     return ArgusConfig()
+
+
+def save_config(config: ArgusConfig, config_path: Path | None = None) -> Path:
+    """Save configuration to YAML file. Creates directories as needed."""
+    path = config_path or DEFAULT_CONFIG_PATH
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as f:
+        yaml.dump(config.model_dump(), f, default_flow_style=False, sort_keys=False)
+    return path
+
+
+def generate_default_config(config_path: Path | None = None) -> Path:
+    """Generate a default configuration file."""
+    path = config_path or DEFAULT_CONFIG_PATH
+    if path.exists():
+        raise FileExistsError(f"Config file already exists at {path}")
+    return save_config(ArgusConfig(), path)
