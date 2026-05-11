@@ -87,3 +87,21 @@ def main(
     """
     if ctx.invoked_subcommand is None:
         show_banner()
+
+
+@app.command()
+def scan_host(
+    output: Annotated[str | None, typer.Option("--output", "-o",
+                      help="Output file path.")] = None,
+    format: Annotated[str, typer.Option("--format", "-f",
+                      help="Output format: markdown or json.")] = "markdown",
+    no_llm: Annotated[bool, typer.Option("--no-llm",
+                      help="Skip LLM enrichment.")] = False,
+) -> None:
+    """Scan local host security posture.
+
+    Collects and analyzes SSH config, users, sudo, network, cron, systemd,
+    firewall, and persistence data.
+    """
+    console.print("[bold cyan]ARGUS Host Security Scan[/bold cyan]")
+    console.print("[dim]This command will be fully implemented in a future update.[/dim]")
