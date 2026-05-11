@@ -34,3 +34,31 @@ class PackageCollector(BaseCollector):
                     description=parts[3] if len(parts) > 3 else "",
                 ))
         return packages
+
+    def get_security_packages(self) -> dict[str, bool]:
+        """Check for presence of security-related packages."""
+        security_packages = [
+            "fail2ban",
+            "ufw",
+            "iptables",
+            "apparmor",
+            "selinux-utils",
+            "auditd",
+            "aide",
+            "rkhunter",
+            "chkrootkit",
+            "clamav",
+            "unattended-upgrades",
+            "needrestart",
+            "libpam-pwquality",
+        ]
+        installed = {pkg.name for pkg in self.collect()}
+        return {pkg: pkg in installed for pkg in security_packages}
+
+    def get_upgradable_count(self) -> int:
+        """Get count of packages with available upgrades."""
+        output = self.safe_run_command(["apt", "list", "--upgradable"])
+        if output is None:
+            return 0
+        lines = [l for l in output.splitlines() if "/" in l]
+        return len(lines)
