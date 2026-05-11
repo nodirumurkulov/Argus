@@ -99,6 +99,8 @@ def scan_host(
                       help="Skip LLM enrichment.")] = False,
     verbose: Annotated[bool, typer.Option("--verbose",
                        help="Show detailed output.")] = False,
+    severity: Annotated[str | None, typer.Option("--severity", "-s",
+                        help="Filter by minimum severity: critical, high, medium, low, info.")] = None,
 ) -> None:
     """Scan local host security posture.
 
@@ -141,6 +143,16 @@ def scan_host(
 
     console.print("\n[bold]Analyzing security posture...[/bold]\n")
     findings = run_all_analyzers(host_data, verbose=verbose)
+
+    if severity:
+        from argus.models import SeverityLevel
+        severity_order = list(SeverityLevel)
+        try:
+            min_sev = SeverityLevel(severity.lower())
+            min_idx = severity_order.index(min_sev)
+            findings = [f for f in findings if severity_order.index(f.severity) <= min_idx]
+        except ValueError:
+            console.print(f"[yellow]Unknown severity: {severity}. Showing all.[/yellow]")
 
     render_findings_table(findings)
     render_summary_panel(findings, hostname=host_data.hostname)
