@@ -111,3 +111,31 @@ class SystemdCollector(BaseCollector):
                     "raw": line,
                 })
         return timers
+
+    def get_writable_unit_files(self) -> list[SystemdService]:
+        """Return services with world-writable unit files."""
+        services = self.collect()
+        return [s for s in services if s.writable]
+
+    def get_failed_services(self) -> list[dict[str, str]]:
+        """Get list of failed systemd services."""
+        output = self.safe_run_command(
+            ["systemctl", "list-units", "--state=failed", "--no-pager", "--no-legend"]
+        )
+        if output is None:
+            return []
+        failed: list[dict[str, str]] = []
+        for line in output.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split()
+            if len(parts) >= 4:
+                failed.append({
+                    "unit": parts[0],
+                    "load": parts[1],
+                    "active": parts[2],
+                    "sub": parts[3],
+                    "description": " ".join(parts[4:]),
+                })
+        return failed
