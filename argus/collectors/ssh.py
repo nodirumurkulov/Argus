@@ -1,5 +1,7 @@
 """SSH configuration collector for ARGUS."""
 
+from pathlib import Path
+
 from argus.collectors.base import BaseCollector
 from argus.models import SSHConfig
 
@@ -83,3 +85,27 @@ class SSHCollector(BaseCollector):
             config.login_grace_time = 120
         config.x11_forwarding = config_dict.get("x11forwarding", "unknown")
         config.protocol = config_dict.get("protocol", "")
+
+    def collect_authorized_keys(self) -> dict[str, list[str]]:
+        """Collect SSH authorized_keys for all users."""
+        passwd = self.safe_read_file("/etc/passwd")
+        if passwd is None:
+            return {}
+        keys_by_user: dict[str, list[str]] = {}
+        for line in passwd.splitlines():
+            parts = line.strip().split(":")
+            if len(parts) < 6:
+                continue
+            username = parts[0]
+            home = parts[5]
+            auth_keys_path = Path(home) / ".ssh" / "authorized_keys"
+            if auth_keys_path.is_file():
+                content = self.safe_read_file(str(auth_keys_path))
+                if content:
+                    keys = [
+                        k.strip() for k in content.splitlines()
+                        if k.strip() and not k.strip().startswith("#")
+                    ]
+                    if keys:
+                        keys_by_user[username] = keys
+        return keys_by_user
