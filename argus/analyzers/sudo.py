@@ -20,6 +20,7 @@ class SudoAnalyzer(BaseAnalyzer):
         findings: list[Finding] = []
         self._check_nopasswd_sudo(users, findings)
         self._check_broad_sudo(sudo_rules, findings)
+        self._check_dangerous_commands(sudo_rules, findings)
         self._check_writable_sudoers(writable_files, findings)
         return findings
 
@@ -64,13 +65,44 @@ class SudoAnalyzer(BaseAnalyzer):
                     ))
                     break
 
+    def _check_dangerous_commands(
+        self, sudo_rules: dict[str, list[str]], findings: list[Finding]
+    ) -> None:
+        """Check for sudo rules allowing dangerous privilege escalation commands."""
+        escalation_commands = [
+            "/bin/bash", "/bin/sh", "/usr/bin/python",
+            "/usr/bin/python3", "/usr/bin/perl", "/usr/bin/ruby",
+            "/usr/bin/env", "/usr/bin/find", "/usr/bin/vim",
+            "/usr/bin/vi", "/usr/bin/less", "/usr/bin/more",
+            "/usr/bin/awk", "/usr/bin/nmap", "/usr/bin/git",
+            "/usr/bin/docker", "/usr/bin/tar",
+        ]
+        for user_or_group, rules in sudo_rules.items():
+            for rule in rules:
+                rule_lower = rule.lower()
+                found = [cmd for cmd in escalation_commands if cmd in rule_lower]
+                if found:
+                    findings.append(self._make_finding(
+                        finding_id=f"ARGUS-SUDO-004-{user_or_group}",
+                        title=f"'{user_or_group}' can sudo escalation-capable commands",
+                        severity="high",
+                        description=(
+                            f"'{user_or_group}' can sudo commands that enable privilege "
+                            f"escalation: {', '.join(found)}"
+                        ),
+                        evidence=[rule],
+                        recommendation="Restrict sudo to only required commands.",
+                        mitre=["T1548.003"],
+                    ))
+                    break
+
     def _check_writable_sudoers(
         self, writable_files: list[str], findings: list[Finding]
     ) -> None:
         """Check for writable sudoers include files."""
         for path in writable_files:
             findings.append(self._make_finding(
-                finding_id=f"ARGUS-SUDO-003",
+                finding_id="ARGUS-SUDO-003",
                 title="Writable sudoers include file found",
                 severity="high",
                 description=(
