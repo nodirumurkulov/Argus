@@ -81,3 +81,33 @@ class HostCollector(BaseCollector):
             if value is not None:
                 settings[key] = value.strip()
         return settings
+
+    def get_loaded_modules(self) -> list[str]:
+        """Get list of loaded kernel modules."""
+        raw = self.safe_read_file("/proc/modules")
+        if raw is None:
+            return []
+        modules: list[str] = []
+        for line in raw.splitlines():
+            parts = line.split()
+            if parts:
+                modules.append(parts[0])
+        return modules
+
+    def get_cpu_info(self) -> dict[str, str]:
+        """Get basic CPU information."""
+        info: dict[str, str] = {}
+        raw = self.safe_read_file("/proc/cpuinfo")
+        if raw is None:
+            return info
+        for line in raw.splitlines():
+            if ":" not in line:
+                continue
+            key, _, value = line.partition(":")
+            key = key.strip()
+            value = value.strip()
+            if key == "model name" and "model_name" not in info:
+                info["model_name"] = value
+            elif key == "cpu cores" and "cpu_cores" not in info:
+                info["cpu_cores"] = value
+        return info
