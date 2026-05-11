@@ -48,3 +48,27 @@ class SudoCollector(BaseCollector):
                     self._parse_sudoers_file(str(entry), rules)
         except PermissionError:
             pass
+
+    def get_nopasswd_users(self) -> list[str]:
+        """Return list of users/groups with NOPASSWD sudo access."""
+        rules = self.collect()
+        nopasswd: list[str] = []
+        for user_or_group, rule_lines in rules.items():
+            if any("NOPASSWD" in r for r in rule_lines):
+                nopasswd.append(user_or_group)
+        return nopasswd
+
+    def get_writable_sudoers_files(self) -> list[str]:
+        """Check for writable sudoers include files."""
+        import os
+
+        writable: list[str] = []
+        sudoers_dir = Path("/etc/sudoers.d")
+        if sudoers_dir.is_dir():
+            try:
+                for entry in sudoers_dir.iterdir():
+                    if entry.is_file() and os.access(str(entry), os.W_OK):
+                        writable.append(str(entry))
+            except PermissionError:
+                pass
+        return writable
