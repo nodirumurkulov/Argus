@@ -135,3 +135,20 @@ class UserCollector(BaseCollector):
             else:
                 lastlog[username] = " ".join(parts[1:])
         return lastlog
+
+    def collect_who(self) -> list[dict[str, str]]:
+        """Get currently logged-in users using 'who' command."""
+        output = self.safe_run_command(["who"])
+        if output is None:
+            return []
+        logged_in: list[dict[str, str]] = []
+        for line in output.splitlines():
+            parts = line.split()
+            if len(parts) >= 3:
+                logged_in.append({
+                    "user": parts[0],
+                    "terminal": parts[1],
+                    "login_time": " ".join(parts[2:4]) if len(parts) >= 4 else parts[2],
+                    "source": parts[4].strip("()") if len(parts) >= 5 else "",
+                })
+        return logged_in
