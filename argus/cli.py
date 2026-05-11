@@ -113,6 +113,7 @@ def scan_host(
         render_recommendations,
         render_summary_panel,
         write_json_output,
+        write_markdown_output,
     )
 
     console.print("\n[bold cyan]╭────────────────────────────────────────────╮[/bold cyan]")
@@ -141,7 +142,7 @@ def scan_host(
         if format == "json":
             write_json_output(findings, output)
         else:
-            console.print(f"\n[green]Report written to:[/green] {output}")
+            write_markdown_output(findings, output, hostname=host_data.hostname)
 
     console.print("[dim]Scan complete.[/dim]\n")
 
