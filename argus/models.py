@@ -65,3 +65,16 @@ class CronEntry(BaseModel):
     schedule: str
     command: str
     source_file: str = ""
+
+
+class SystemdService(BaseModel):
+    """A systemd service unit."""
+
+    name: str
+    unit_file: str
+    state: str = ""
+    enabled: bool = False
+    description: str = ""
+    exec_start: str = ""
+    user: str = ""
+    writable: bool = False
