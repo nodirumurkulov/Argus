@@ -57,3 +57,75 @@ class SSHAnalyzer(BaseAnalyzer):
                 recommendation="Disable SSH password authentication and use key-based login.",
                 mitre=["T1110"],
             ))
+
+    def _check_empty_passwords(
+        self, config: SSHConfig, findings: list[Finding]
+    ) -> None:
+        """Check if empty password login is permitted."""
+        if config.permit_empty_passwords.lower() == "yes":
+            findings.append(self._make_finding(
+                finding_id="ARGUS-SSH-003",
+                title="SSH allows login with empty passwords",
+                severity="critical",
+                description=(
+                    "SSH is configured to allow login with empty passwords. "
+                    "Any account without a password can be accessed remotely."
+                ),
+                evidence=[f"PermitEmptyPasswords {config.permit_empty_passwords}"],
+                recommendation="Set 'PermitEmptyPasswords no' in /etc/ssh/sshd_config.",
+                mitre=["T1078"],
+            ))
+
+    def _check_listen_address(
+        self, config: SSHConfig, findings: list[Finding]
+    ) -> None:
+        """Check if SSH is listening on all interfaces."""
+        if config.listen_address in ("0.0.0.0", "", "::"):
+            findings.append(self._make_finding(
+                finding_id="ARGUS-SSH-004",
+                title="SSH listening on all interfaces",
+                severity="info",
+                description=(
+                    "SSH is listening on all network interfaces. Consider "
+                    "restricting to specific interfaces if not needed."
+                ),
+                evidence=[f"ListenAddress {config.listen_address or '0.0.0.0 (default)'}"],
+                recommendation="Bind SSH to specific interfaces using ListenAddress.",
+                mitre=["T1021.004"],
+            ))
+
+    def _check_x11_forwarding(
+        self, config: SSHConfig, findings: list[Finding]
+    ) -> None:
+        """Check if X11 forwarding is enabled."""
+        if config.x11_forwarding.lower() == "yes":
+            findings.append(self._make_finding(
+                finding_id="ARGUS-SSH-005",
+                title="SSH X11 forwarding is enabled",
+                severity="low",
+                description=(
+                    "X11 forwarding is enabled. This can be exploited for "
+                    "keylogging or display hijacking if compromised."
+                ),
+                evidence=[f"X11Forwarding {config.x11_forwarding}"],
+                recommendation="Disable X11 forwarding unless specifically required.",
+                mitre=["T1056"],
+            ))
+
+    def _check_max_auth_tries(
+        self, config: SSHConfig, findings: list[Finding]
+    ) -> None:
+        """Check if MaxAuthTries is set too high."""
+        if config.max_auth_tries > 6:
+            findings.append(self._make_finding(
+                finding_id="ARGUS-SSH-006",
+                title="SSH MaxAuthTries is set too high",
+                severity="low",
+                description=(
+                    f"MaxAuthTries is set to {config.max_auth_tries}. "
+                    "High values increase brute-force window."
+                ),
+                evidence=[f"MaxAuthTries {config.max_auth_tries}"],
+                recommendation="Set MaxAuthTries to 3 or lower.",
+                mitre=["T1110"],
+            ))
