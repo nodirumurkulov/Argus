@@ -28,3 +28,20 @@ class Finding(BaseModel):
     mitre: list[str] = Field(default_factory=list, description="MITRE ATT&CK technique IDs")
     references: list[str] = Field(default_factory=list, description="External reference URLs")
     llm_summary: str | None = Field(default=None, description="LLM-generated summary")
+
+
+class UserInfo(BaseModel):
+    """Information about a local system user."""
+
+    username: str
+    uid: int
+    gid: int
+    home: str
+    shell: str
+    gecos: str = ""
+    has_password: bool = True
+    password_empty: bool = False
+    groups: list[str] = Field(default_factory=list)
+    sudo_access: bool = False
+    sudo_nopasswd: bool = False
+    last_login: str | None = None
