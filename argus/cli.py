@@ -97,14 +97,74 @@ def scan_host(
                       help="Output format: markdown or json.")] = "markdown",
     no_llm: Annotated[bool, typer.Option("--no-llm",
                       help="Skip LLM enrichment.")] = False,
+    verbose: Annotated[bool, typer.Option("--verbose",
+                       help="Show detailed output.")] = False,
+    severity: Annotated[str | None, typer.Option("--severity", "-s",
+                        help="Filter by minimum severity: critical, high, medium, low, info.")] = None,
 ) -> None:
     """Scan local host security posture.
 
     Collects and analyzes SSH config, users, sudo, network, cron, systemd,
     firewall, and persistence data.
     """
-    console.print("[bold cyan]ARGUS Host Security Scan[/bold cyan]")
-    console.print("[dim]This command will be fully implemented in a future update.[/dim]")
+    from argus.analyzers.engine import run_all_analyzers
+    from argus.collectors.aggregator import collect_host_data
+    from argus.output import (
+        render_collector_stats,
+        render_findings_table,
+        render_host_info,
+        render_recommendations,
+        render_summary_panel,
+        write_json_output,
+        write_markdown_output,
+    )
+
+    console.print("\n[bold cyan]╭────────────────────────────────────────────╮[/bold cyan]")
+    console.print("[bold cyan]│[/bold cyan] [bold]ARGUS Host Security Scan[/bold]                   [bold cyan]│[/bold cyan]")
+    console.print("[bold cyan]│[/bold cyan] [dim]Offline AI Defensive Security Assistant[/dim]    [bold cyan]│[/bold cyan]")
+    console.print("[bold cyan]╰────────────────────────────────────────────╯[/bold cyan]\n")
+
+    console.print("[bold]Collecting host data...[/bold]\n")
+    host_data = collect_host_data(verbose=verbose)
+
+    render_host_info(
+        hostname=host_data.hostname,
+        os_release=host_data.os_release,
+        kernel_version=host_data.kernel_version,
+        uptime=host_data.uptime,
+    )
+    render_collector_stats(
+        users_count=len(host_data.users),
+        ports_count=len(host_data.network_connections),
+        services_count=len(host_data.systemd_services),
+        packages_count=len(host_data.packages),
+        cron_count=len(host_data.cron_entries),
+    )
+
+    console.print("\n[bold]Analyzing security posture...[/bold]\n")
+    findings = run_all_analyzers(host_data, verbose=verbose)
+
+    if severity:
+        from argus.models import SeverityLevel
+        severity_order = list(SeverityLevel)
+        try:
+            min_sev = SeverityLevel(severity.lower())
+            min_idx = severity_order.index(min_sev)
+            findings = [f for f in findings if severity_order.index(f.severity) <= min_idx]
+        except ValueError:
+            console.print(f"[yellow]Unknown severity: {severity}. Showing all.[/yellow]")
+
+    render_findings_table(findings)
+    render_summary_panel(findings, hostname=host_data.hostname)
+    render_recommendations(findings)
+
+    if output:
+        if format == "json":
+            write_json_output(findings, output)
+        else:
+            write_markdown_output(findings, output, hostname=host_data.hostname)
+
+    console.print("[dim]Scan complete.[/dim]\n")
 
 
 @app.command()
@@ -122,8 +182,52 @@ def analyze_logs(
     Detects brute-force attempts, password spraying, suspicious logins,
     sudo abuse, and more.
     """
-    console.print(f"[bold cyan]ARGUS Log Analysis:[/bold cyan] {log_file}")
-    console.print("[dim]This command will be fully implemented in a future update.[/dim]")
+    from pathlib import Path
+
+    from argus.analyzers.auth_logs import AuthLogAnalyzer
+    from argus.collectors.logs import LogCollector
+    from argus.output import (
+        render_findings_table,
+        render_recommendations,
+        render_summary_panel,
+        write_json_output,
+        write_markdown_output,
+    )
+
+    console.print("\n[bold cyan]╭────────────────────────────────────────────╮[/bold cyan]")
+    console.print("[bold cyan]│[/bold cyan] [bold]ARGUS Log Analysis[/bold]                        [bold cyan]│[/bold cyan]")
+    console.print("[bold cyan]│[/bold cyan] [dim]Offline AI Defensive Security Assistant[/dim]    [bold cyan]│[/bold cyan]")
+    console.print("[bold cyan]╰────────────────────────────────────────────╯[/bold cyan]\n")
+
+    log_path = Path(log_file)
+    if not log_path.is_file():
+        console.print(f"[bold red]Error:[/bold red] Log file not found: {log_file}")
+        raise typer.Exit(code=1)
+
+    console.print(f"[bold]Analyzing:[/bold] {log_file}\n")
+    collector = LogCollector()
+    log_lines = collector._read_log(str(log_path))
+
+    if not log_lines:
+        console.print("[yellow]No log entries found.[/yellow]")
+        raise typer.Exit()
+
+    console.print(f"  [green]✓[/green] Read {len(log_lines)} log entries\n")
+
+    analyzer = AuthLogAnalyzer()
+    findings = analyzer.analyze(log_lines)
+
+    render_findings_table(findings)
+    render_summary_panel(findings)
+    render_recommendations(findings)
+
+    if output:
+        if format == "json":
+            write_json_output(findings, output)
+        else:
+            write_markdown_output(findings, output)
+
+    console.print("[dim]Analysis complete.[/dim]\n")
 
 
 INVESTIGATION_CASES = [
