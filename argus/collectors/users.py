@@ -1,7 +1,5 @@
 """User and group information collector for ARGUS."""
 
-from pathlib import Path
-
 from argus.collectors.base import BaseCollector
 from argus.models import UserInfo
 

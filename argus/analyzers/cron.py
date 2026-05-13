@@ -35,7 +35,7 @@ class CronAnalyzer(BaseAnalyzer):
             matched = [p for p in SUSPICIOUS_COMMANDS if p in cmd_lower]
             if matched:
                 findings.append(self._make_finding(
-                    finding_id=f"ARGUS-CRON-001",
+                    finding_id="ARGUS-CRON-001",
                     title="Suspicious cron job detected",
                     severity="high",
                     description=(

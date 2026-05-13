@@ -60,5 +60,5 @@ class PackageCollector(BaseCollector):
         output = self.safe_run_command(["apt", "list", "--upgradable"])
         if output is None:
             return 0
-        lines = [l for l in output.splitlines() if "/" in l]
+        lines = [line for line in output.splitlines() if "/" in line]
         return len(lines)
