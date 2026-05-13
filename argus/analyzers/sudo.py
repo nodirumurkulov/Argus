@@ -4,6 +4,12 @@ from argus.analyzers.base import BaseAnalyzer
 from argus.models import Finding, UserInfo
 
 
+def _id_fragment(value: str) -> str:
+    """Create a compact finding ID fragment from sudoers subjects and paths."""
+    fragment = "".join(char if char.isalnum() else "-" for char in value.lower())
+    return fragment.strip("-")[:48] or "unknown"
+
+
 class SudoAnalyzer(BaseAnalyzer):
     """Analyze sudo configuration for security issues."""
 
@@ -102,7 +108,7 @@ class SudoAnalyzer(BaseAnalyzer):
         """Check for writable sudoers include files."""
         for path in writable_files:
             findings.append(self._make_finding(
-                finding_id="ARGUS-SUDO-003",
+                finding_id=f"ARGUS-SUDO-003-{_id_fragment(path)}",
                 title="Writable sudoers include file found",
                 severity="high",
                 description=(

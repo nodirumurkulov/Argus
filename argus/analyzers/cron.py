@@ -12,6 +12,12 @@ SUSPICIOUS_COMMANDS = [
 ]
 
 
+def _id_fragment(value: str) -> str:
+    """Create a compact finding ID fragment from user-controlled text."""
+    fragment = "".join(char if char.isalnum() else "-" for char in value.lower())
+    return fragment.strip("-")[:40] or "unknown"
+
+
 class CronAnalyzer(BaseAnalyzer):
     """Analyze cron job entries for security issues."""
 
@@ -30,12 +36,12 @@ class CronAnalyzer(BaseAnalyzer):
         self, entries: list[CronEntry], findings: list[Finding]
     ) -> None:
         """Check for cron entries with suspicious commands."""
-        for entry in entries:
+        for index, entry in enumerate(entries, 1):
             cmd_lower = entry.command.lower()
             matched = [p for p in SUSPICIOUS_COMMANDS if p in cmd_lower]
             if matched:
                 findings.append(self._make_finding(
-                    finding_id="ARGUS-CRON-001",
+                    finding_id=f"ARGUS-CRON-001-{index:03d}-{_id_fragment(entry.user)}",
                     title="Suspicious cron job detected",
                     severity="high",
                     description=(
@@ -77,7 +83,7 @@ class CronAnalyzer(BaseAnalyzer):
         """Check if cron jobs reference world-writable scripts."""
         import os
 
-        for entry in entries:
+        for index, entry in enumerate(entries, 1):
             cmd_parts = entry.command.split()
             if not cmd_parts:
                 continue
@@ -85,7 +91,7 @@ class CronAnalyzer(BaseAnalyzer):
             if script.startswith("/") and os.path.isfile(script):
                 if os.access(script, os.W_OK):
                     findings.append(self._make_finding(
-                        finding_id="ARGUS-CRON-003",
+                        finding_id=f"ARGUS-CRON-003-{index:03d}",
                         title="Cron job references writable script",
                         severity="high",
                         description=(
