@@ -3,7 +3,9 @@
 from typing import Annotated
 
 import typer
+from rich.align import Align
 from rich.console import Console
+from rich.panel import Panel
 
 from argus import __version__
 from argus.models import Finding, SeverityLevel
@@ -58,44 +60,35 @@ app.add_typer(config_app, name="config")
 
 
 BANNER = r"""
-[cyan]
-        ╔══════════════════════════════════════════════════════════════════╗
-        ║                                                                ║
-        ║     █████╗ ██████╗  ██████╗ ██╗   ██╗███████╗                  ║
-        ║    ██╔══██╗██╔══██╗██╔════╝ ██║   ██║██╔════╝                  ║
-        ║    ███████║██████╔╝██║  ███╗██║   ██║███████╗                  ║
-        ║    ██╔══██║██╔══██╗██║   ██║██║   ██║╚════██║                  ║
-        ║    ██║  ██║██║  ██║╚██████╔╝╚██████╔╝███████║                  ║
-        ║    ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚══════╝                  ║
-        ║                                                                ║
-        ╚══════════════════════════════════════════════════════════════════╝
-[/cyan]
-[bold red]          ◈ OFFLINE AI DEFENSIVE SECURITY ASSISTANT ◈[/bold red]
-[dim]         ──────── DETECT • ANALYZE • HARDEN • DEFEND ────────[/dim]
+[bold cyan]   ___    ____   ______  __  _______[/bold cyan]
+[bold cyan]  /   |  / __ \ / ____/ / / / / ___/[/bold cyan]
+[bold cyan] / /| | / /_/ // / __  / / / /\__ \ [/bold cyan]
+[bold cyan]/ ___ |/ _, _// /_/ / / /_/ /___/ / [/bold cyan]
+[bold cyan]/_/  |_/_/ |_| \____/  \____//____/  [/bold cyan]
 
-[bold white]  ╭──────────────────────────────────────────────────────────────╮[/bold white]
-[bold white]  │[/bold white] [italic cyan] "See everything. Understand everything. Secure everything." [/italic cyan] [bold white]│[/bold white]
-[bold white]  │[/bold white]                                           [dim]— ARGUS[/dim]            [bold white]│[/bold white]
-[bold white]  ╰──────────────────────────────────────────────────────────────╯[/bold white]
+[bold white]Offline Defensive Security Assistant[/bold white]
+[dim]Local-first Linux posture scanning, log triage, and reporting[/dim]
 
-[bold red]  ┌─ CAPABILITIES ─────────────────────────────────────────────┐[/bold red]
-[bold red]  │[/bold red]  [cyan]◉[/cyan]  Host Security Scanning         [dim]scan-host[/dim]              [bold red]│[/bold red]
-[bold red]  │[/bold red]  [cyan]◉[/cyan]  Log Analysis & Threat Detection [dim]analyze-logs[/dim]          [bold red]│[/bold red]
-[bold red]  │[/bold red]  [cyan]◉[/cyan]  Incident Investigation          [dim]investigate[/dim]           [bold red]│[/bold red]
-[bold red]  │[/bold red]  [cyan]◉[/cyan]  Detection Rule Generation       [dim]generate-rule[/dim]         [bold red]│[/bold red]
-[bold red]  │[/bold red]  [cyan]◉[/cyan]  Security Report Generation      [dim]report[/dim]                [bold red]│[/bold red]
-[bold red]  │[/bold red]  [cyan]◉[/cyan]  Offline LLM Analysis            [dim]via Ollama[/dim]            [bold red]│[/bold red]
-[bold red]  └─────────────────────────────────────────────────────────────┘[/bold red]
+[bright_black]COMMANDS[/bright_black]
+[cyan]scan-host[/cyan]     host posture and hardening checks
+[cyan]analyze-logs[/cyan]  SSH brute-force and auth event triage
+[cyan]report[/cyan]        render exported findings as markdown or JSON
+[cyan]config[/cyan]        manage local ARGUS settings
 
-[bold cyan]  MODEL:[/bold cyan] [white]ollama (local)[/white]  │  [bold cyan]ENGINE:[/bold cyan] [white]rule-based + AI[/white]  │  [bold cyan]OS:[/bold cyan] [white]Linux[/white]
-
-[dim green]  [argus@localhost ~]$  ready to defend. _[/dim green]
+[bright_black]ENGINE[/bright_black] rule-based  [bright_black]MODEL[/bright_black] local Ollama optional  [bright_black]MODE[/bright_black] read-only
+[green]argus ready[/green] [dim]detect | analyze | harden | defend[/dim]
 """
 
 
 def show_banner() -> None:
     """Display the ARGUS startup banner."""
-    console.print(BANNER)
+    console.print(Panel(
+        Align.center(BANNER.strip(), vertical="middle"),
+        border_style="bright_cyan",
+        padding=(1, 4),
+        style="white on black",
+        subtitle="[bright_black]offline-first blue-team analysis[/bright_black]",
+    ))
 
 
 def version_callback(value: bool) -> None:
