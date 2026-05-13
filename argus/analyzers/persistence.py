@@ -4,6 +4,12 @@ from argus.analyzers.base import BaseAnalyzer
 from argus.models import Finding
 
 
+def _id_fragment(value: str) -> str:
+    """Create a compact finding ID fragment from path-like text."""
+    fragment = "".join(char if char.isalnum() else "-" for char in value.lower())
+    return fragment.strip("-")[:48] or "unknown"
+
+
 class PersistenceAnalyzer(BaseAnalyzer):
     """Analyze persistence locations for security issues."""
 
@@ -26,7 +32,7 @@ class PersistenceAnalyzer(BaseAnalyzer):
         for loc in writable:
             path = loc.split(":", 1)[1]
             findings.append(self._make_finding(
-                finding_id="ARGUS-PERS-001",
+                finding_id=f"ARGUS-PERS-001-{_id_fragment(path)}",
                 title=f"Writable startup file: {path}",
                 severity="medium",
                 description=(
@@ -46,7 +52,7 @@ class PersistenceAnalyzer(BaseAnalyzer):
         for loc in suspicious:
             path = loc.split(":", 1)[1]
             findings.append(self._make_finding(
-                finding_id="ARGUS-PERS-002",
+                finding_id=f"ARGUS-PERS-002-{_id_fragment(path)}",
                 title=f"Suspicious shell rc file: {path}",
                 severity="high",
                 description=(

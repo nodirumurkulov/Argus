@@ -104,6 +104,7 @@ argus scan-host --no-llm
 
 ```bash
 argus analyze-logs /var/log/auth.log
+argus analyze-logs /var/log/auth.log --severity high
 argus analyze-logs /var/log/auth.log --output auth-report.md
 ```
 
@@ -127,6 +128,7 @@ argus generate-rule --type yara --scenario linux-webshell
 
 ```bash
 argus report --input findings.json --format markdown
+argus report --input findings.json --format markdown --output report.md
 argus report --input findings.json --format json
 ```
 
@@ -229,8 +231,7 @@ argus/
     cli.py               # CLI commands (typer + rich)
     config.py            # Configuration management
     models.py            # Pydantic data models
-    llm.py               # Ollama LLM integration
-    report.py            # Report generation
+    output.py            # Rich output and report writers
     collectors/          # Host data collectors
     analyzers/           # Security analyzers
     detections/          # Detection rule generators
@@ -249,14 +250,16 @@ argus/
 - [x] Python package with CLI
 - [x] CLI with typer and Rich
 - [x] Data models and configuration
-- [ ] Host security scanning
-- [ ] Authentication log analysis
-- [ ] Markdown and JSON reports
+- [x] Host security scanning
+- [x] Authentication log analysis
+- [x] Markdown and JSON reports
+- [x] CLI option validation
+- [x] GitHub Actions CI
 - [ ] Ollama LLM integration
 - [ ] Sigma rule generation
 - [ ] auditd rule generation
-- [ ] MITRE ATT&CK mapping
-- [ ] Unit tests
+- [x] MITRE ATT&CK mapping for core findings
+- [x] Initial unit tests
 
 ### Future
 - [ ] YARA rule generation

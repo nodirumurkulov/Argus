@@ -6,7 +6,7 @@ import typer
 from rich.console import Console
 
 from argus import __version__
-from argus.models import SeverityLevel
+from argus.models import Finding, SeverityLevel
 
 app = typer.Typer(
     name="argus",
@@ -38,6 +38,16 @@ def validate_severity(value: str | None) -> str | None:
     if normalized not in allowed:
         raise typer.BadParameter(f"must be one of: {', '.join(sorted(allowed))}")
     return normalized
+
+
+def filter_findings_by_severity(findings: list[Finding], severity: str | None) -> list[Finding]:
+    """Filter findings by minimum severity."""
+    if not severity:
+        return findings
+    severity_order = list(SeverityLevel)
+    min_sev = SeverityLevel(severity)
+    min_idx = severity_order.index(min_sev)
+    return [finding for finding in findings if severity_order.index(finding.severity) <= min_idx]
 
 config_app = typer.Typer(
     name="config",
@@ -170,10 +180,7 @@ def scan_host(
     findings = run_all_analyzers(host_data, verbose=verbose)
 
     if severity:
-        severity_order = list(SeverityLevel)
-        min_sev = SeverityLevel(severity)
-        min_idx = severity_order.index(min_sev)
-        findings = [f for f in findings if severity_order.index(f.severity) <= min_idx]
+        findings = filter_findings_by_severity(findings, severity)
 
     render_findings_table(findings)
     render_summary_panel(findings, hostname=host_data.hostname)
@@ -198,6 +205,9 @@ def analyze_logs(
                       help="Output format: markdown or json.")] = "markdown",
     no_llm: Annotated[bool, typer.Option("--no-llm",
                       help="Skip LLM enrichment.")] = False,
+    severity: Annotated[str | None, typer.Option("--severity", "-s",
+                         callback=validate_severity,
+                         help="Filter by minimum severity: critical, high, medium, low, info.")] = None,
 ) -> None:
     """Analyze Linux authentication and system logs.
 
@@ -238,6 +248,7 @@ def analyze_logs(
 
     analyzer = AuthLogAnalyzer()
     findings = analyzer.analyze(log_lines)
+    findings = filter_findings_by_severity(findings, severity)
 
     render_findings_table(findings)
     render_summary_panel(findings)
@@ -324,8 +335,48 @@ def report(
 
     Supports Markdown and JSON output formats.
     """
+    import json
+    from pathlib import Path
+
+    from pydantic import ValidationError
+
+    from argus.output import (
+        render_findings_table,
+        render_recommendations,
+        render_summary_panel,
+        write_json_output,
+        write_markdown_output,
+    )
+
+    if not input:
+        console.print("[bold red]Error:[/bold red] --input is required.")
+        raise typer.Exit(code=1)
+
+    input_path = Path(input)
+    if not input_path.is_file():
+        console.print(f"[bold red]Error:[/bold red] Findings file not found: {input}")
+        raise typer.Exit(code=1)
+
+    try:
+        data = json.loads(input_path.read_text())
+        findings_data = data.get("findings") if isinstance(data, dict) else None
+        if not isinstance(findings_data, list):
+            raise ValueError("expected a JSON object with a findings list")
+        findings = [Finding(**finding) for finding in findings_data]
+    except (json.JSONDecodeError, ValidationError, ValueError) as exc:
+        console.print(f"[bold red]Error:[/bold red] Invalid findings JSON: {exc}")
+        raise typer.Exit(code=1) from exc
+
     console.print("[bold cyan]ARGUS Report Generation[/bold cyan]")
-    console.print("[dim]This command will be fully implemented in a future update.[/dim]")
+    if output:
+        if format == "json":
+            write_json_output(findings, output)
+        else:
+            write_markdown_output(findings, output)
+    else:
+        render_findings_table(findings)
+        render_summary_panel(findings)
+        render_recommendations(findings)
 
 
 @config_app.command("init")

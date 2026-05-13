@@ -32,3 +32,20 @@ def test_scan_host_rejects_invalid_severity() -> None:
     assert result.exit_code != 0
     assert "must be one of" in result.output
     assert "Collecting host data" not in result.output
+
+
+def test_analyze_logs_rejects_invalid_severity() -> None:
+    """analyze-logs should reject unsupported severities."""
+    result = runner.invoke(app, ["analyze-logs", "examples/sample-auth.log", "--severity", "urgent"])
+
+    assert result.exit_code != 0
+    assert "must be one of" in result.output
+
+
+def test_analyze_logs_filters_by_minimum_severity() -> None:
+    """analyze-logs should filter findings below the selected severity."""
+    result = runner.invoke(app, ["analyze-logs", "examples/sample-auth.log", "--severity", "critical"])
+
+    assert result.exit_code == 0
+    assert "CRITICAL" in result.output
+    assert "Direct root SSH login" not in result.output
