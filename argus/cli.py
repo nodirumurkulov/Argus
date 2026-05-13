@@ -335,8 +335,48 @@ def report(
 
     Supports Markdown and JSON output formats.
     """
+    import json
+    from pathlib import Path
+
+    from pydantic import ValidationError
+
+    from argus.output import (
+        render_findings_table,
+        render_recommendations,
+        render_summary_panel,
+        write_json_output,
+        write_markdown_output,
+    )
+
+    if not input:
+        console.print("[bold red]Error:[/bold red] --input is required.")
+        raise typer.Exit(code=1)
+
+    input_path = Path(input)
+    if not input_path.is_file():
+        console.print(f"[bold red]Error:[/bold red] Findings file not found: {input}")
+        raise typer.Exit(code=1)
+
+    try:
+        data = json.loads(input_path.read_text())
+        findings_data = data.get("findings") if isinstance(data, dict) else None
+        if not isinstance(findings_data, list):
+            raise ValueError("expected a JSON object with a findings list")
+        findings = [Finding(**finding) for finding in findings_data]
+    except (json.JSONDecodeError, ValidationError, ValueError) as exc:
+        console.print(f"[bold red]Error:[/bold red] Invalid findings JSON: {exc}")
+        raise typer.Exit(code=1) from exc
+
     console.print("[bold cyan]ARGUS Report Generation[/bold cyan]")
-    console.print("[dim]This command will be fully implemented in a future update.[/dim]")
+    if output:
+        if format == "json":
+            write_json_output(findings, output)
+        else:
+            write_markdown_output(findings, output)
+    else:
+        render_findings_table(findings)
+        render_summary_panel(findings)
+        render_recommendations(findings)
 
 
 @config_app.command("init")
