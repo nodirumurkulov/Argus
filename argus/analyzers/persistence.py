@@ -22,7 +22,7 @@ class PersistenceAnalyzer(BaseAnalyzer):
         self, locations: list[str], findings: list[Finding]
     ) -> None:
         """Check for writable persistence paths."""
-        writable = [l for l in locations if l.startswith("writable:")]
+        writable = [location for location in locations if location.startswith("writable:")]
         for loc in writable:
             path = loc.split(":", 1)[1]
             findings.append(self._make_finding(
@@ -42,7 +42,7 @@ class PersistenceAnalyzer(BaseAnalyzer):
         self, locations: list[str], findings: list[Finding]
     ) -> None:
         """Check for shell rc files with suspicious content."""
-        suspicious = [l for l in locations if l.startswith("suspicious_rc:")]
+        suspicious = [location for location in locations if location.startswith("suspicious_rc:")]
         for loc in suspicious:
             path = loc.split(":", 1)[1]
             findings.append(self._make_finding(
@@ -62,7 +62,7 @@ class PersistenceAnalyzer(BaseAnalyzer):
         self, locations: list[str], findings: list[Finding]
     ) -> None:
         """Report executable startup scripts."""
-        scripts = [l for l in locations if l.startswith("startup_script:")]
+        scripts = [location for location in locations if location.startswith("startup_script:")]
         if len(scripts) > 20:
             findings.append(self._make_finding(
                 finding_id="ARGUS-PERS-003",

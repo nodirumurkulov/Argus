@@ -130,7 +130,7 @@ def render_finding_detail(finding: Finding) -> None:
     for e in finding.evidence:
         content_parts.append(f"  • {e}")
     if finding.recommendation:
-        content_parts.append(f"\n[bold]Recommendation:[/bold]")
+        content_parts.append("\n[bold]Recommendation:[/bold]")
         content_parts.append(f"  {finding.recommendation}")
     if finding.mitre:
         content_parts.append(f"\n[bold]MITRE ATT&CK:[/bold] {', '.join(finding.mitre)}")

@@ -97,8 +97,8 @@ class UserAnalyzer(BaseAnalyzer):
         if root_auth_keys.is_file():
             content = root_auth_keys.read_text().strip()
             key_count = len([
-                l for l in content.splitlines()
-                if l.strip() and not l.strip().startswith("#")
+                line for line in content.splitlines()
+                if line.strip() and not line.strip().startswith("#")
             ])
             if key_count > 0:
                 findings.append(self._make_finding(

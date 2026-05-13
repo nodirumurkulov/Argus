@@ -6,6 +6,7 @@ import typer
 from rich.console import Console
 
 from argus import __version__
+from argus.models import SeverityLevel
 
 app = typer.Typer(
     name="argus",
@@ -15,6 +16,28 @@ app = typer.Typer(
 )
 
 console = Console()
+
+VALID_OUTPUT_FORMATS = {"markdown", "json"}
+
+
+def validate_output_format(value: str) -> str:
+    """Validate CLI output format values."""
+    normalized = value.lower()
+    if normalized not in VALID_OUTPUT_FORMATS:
+        allowed = ", ".join(sorted(VALID_OUTPUT_FORMATS))
+        raise typer.BadParameter(f"must be one of: {allowed}")
+    return normalized
+
+
+def validate_severity(value: str | None) -> str | None:
+    """Validate CLI severity filter values."""
+    if value is None:
+        return None
+    normalized = value.lower()
+    allowed = {severity.value for severity in SeverityLevel}
+    if normalized not in allowed:
+        raise typer.BadParameter(f"must be one of: {', '.join(sorted(allowed))}")
+    return normalized
 
 config_app = typer.Typer(
     name="config",
@@ -92,15 +115,17 @@ def main(
 @app.command()
 def scan_host(
     output: Annotated[str | None, typer.Option("--output", "-o",
-                      help="Output file path.")] = None,
+                       help="Output file path.")] = None,
     format: Annotated[str, typer.Option("--format", "-f",
+                      callback=validate_output_format,
                       help="Output format: markdown or json.")] = "markdown",
     no_llm: Annotated[bool, typer.Option("--no-llm",
                       help="Skip LLM enrichment.")] = False,
     verbose: Annotated[bool, typer.Option("--verbose",
                        help="Show detailed output.")] = False,
     severity: Annotated[str | None, typer.Option("--severity", "-s",
-                        help="Filter by minimum severity: critical, high, medium, low, info.")] = None,
+                         callback=validate_severity,
+                         help="Filter by minimum severity: critical, high, medium, low, info.")] = None,
 ) -> None:
     """Scan local host security posture.
 
@@ -145,14 +170,10 @@ def scan_host(
     findings = run_all_analyzers(host_data, verbose=verbose)
 
     if severity:
-        from argus.models import SeverityLevel
         severity_order = list(SeverityLevel)
-        try:
-            min_sev = SeverityLevel(severity.lower())
-            min_idx = severity_order.index(min_sev)
-            findings = [f for f in findings if severity_order.index(f.severity) <= min_idx]
-        except ValueError:
-            console.print(f"[yellow]Unknown severity: {severity}. Showing all.[/yellow]")
+        min_sev = SeverityLevel(severity)
+        min_idx = severity_order.index(min_sev)
+        findings = [f for f in findings if severity_order.index(f.severity) <= min_idx]
 
     render_findings_table(findings)
     render_summary_panel(findings, hostname=host_data.hostname)
@@ -171,8 +192,9 @@ def scan_host(
 def analyze_logs(
     log_file: Annotated[str, typer.Argument(help="Path to log file to analyze.")],
     output: Annotated[str | None, typer.Option("--output", "-o",
-                      help="Output file path.")] = None,
+                       help="Output file path.")] = None,
     format: Annotated[str, typer.Option("--format", "-f",
+                      callback=validate_output_format,
                       help="Output format: markdown or json.")] = "markdown",
     no_llm: Annotated[bool, typer.Option("--no-llm",
                       help="Skip LLM enrichment.")] = False,
@@ -291,8 +313,9 @@ def generate_rule(
 @app.command()
 def report(
     input: Annotated[str, typer.Option("--input", "-i",
-                     help="Input findings JSON file.")] = "",
+                      help="Input findings JSON file.")] = "",
     format: Annotated[str, typer.Option("--format", "-f",
+                      callback=validate_output_format,
                       help="Output format: markdown or json.")] = "markdown",
     output: Annotated[str | None, typer.Option("--output", "-o",
                       help="Output file path.")] = None,
