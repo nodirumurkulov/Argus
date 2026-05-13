@@ -6,7 +6,7 @@ import typer
 from rich.console import Console
 
 from argus import __version__
-from argus.models import SeverityLevel
+from argus.models import Finding, SeverityLevel
 
 app = typer.Typer(
     name="argus",
@@ -38,6 +38,16 @@ def validate_severity(value: str | None) -> str | None:
     if normalized not in allowed:
         raise typer.BadParameter(f"must be one of: {', '.join(sorted(allowed))}")
     return normalized
+
+
+def filter_findings_by_severity(findings: list[Finding], severity: str | None) -> list[Finding]:
+    """Filter findings by minimum severity."""
+    if not severity:
+        return findings
+    severity_order = list(SeverityLevel)
+    min_sev = SeverityLevel(severity)
+    min_idx = severity_order.index(min_sev)
+    return [finding for finding in findings if severity_order.index(finding.severity) <= min_idx]
 
 config_app = typer.Typer(
     name="config",
@@ -170,10 +180,7 @@ def scan_host(
     findings = run_all_analyzers(host_data, verbose=verbose)
 
     if severity:
-        severity_order = list(SeverityLevel)
-        min_sev = SeverityLevel(severity)
-        min_idx = severity_order.index(min_sev)
-        findings = [f for f in findings if severity_order.index(f.severity) <= min_idx]
+        findings = filter_findings_by_severity(findings, severity)
 
     render_findings_table(findings)
     render_summary_panel(findings, hostname=host_data.hostname)
@@ -198,6 +205,9 @@ def analyze_logs(
                       help="Output format: markdown or json.")] = "markdown",
     no_llm: Annotated[bool, typer.Option("--no-llm",
                       help="Skip LLM enrichment.")] = False,
+    severity: Annotated[str | None, typer.Option("--severity", "-s",
+                         callback=validate_severity,
+                         help="Filter by minimum severity: critical, high, medium, low, info.")] = None,
 ) -> None:
     """Analyze Linux authentication and system logs.
 
@@ -238,6 +248,7 @@ def analyze_logs(
 
     analyzer = AuthLogAnalyzer()
     findings = analyzer.analyze(log_lines)
+    findings = filter_findings_by_severity(findings, severity)
 
     render_findings_table(findings)
     render_summary_panel(findings)
