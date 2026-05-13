@@ -8,6 +8,16 @@ from argus.cli import app
 runner = CliRunner()
 
 
+def test_root_command_renders_dashboard() -> None:
+    """Root command should render the ARGUS dashboard instead of empty output."""
+    result = runner.invoke(app, [])
+
+    assert result.exit_code == 0
+    assert "ARGUS" in result.output
+    assert "scan-host" in result.output
+    assert "analyze-logs" in result.output
+
+
 def test_scan_host_rejects_invalid_output_format() -> None:
     """scan-host should fail before collecting data for unsupported formats."""
     result = runner.invoke(app, ["scan-host", "--format", "xml"])
