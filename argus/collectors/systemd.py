@@ -1,10 +1,10 @@
 """Systemd service and timer collector for ARGUS."""
 
-import os
 from pathlib import Path
 
 from argus.collectors.base import BaseCollector
 from argus.models import SystemdService
+from argus.permissions import is_group_or_world_writable
 
 
 SYSTEMD_PATHS = [
@@ -54,7 +54,7 @@ class SystemdCollector(BaseCollector):
         service = SystemdService(
             name=path.name,
             unit_file=str(path),
-            writable=os.access(str(path), os.W_OK),
+            writable=is_group_or_world_writable(path),
         )
         section = ""
         for line in raw.splitlines():
@@ -113,7 +113,7 @@ class SystemdCollector(BaseCollector):
         return timers
 
     def get_writable_unit_files(self) -> list[SystemdService]:
-        """Return services with world-writable unit files."""
+        """Return services with group/world-writable unit files."""
         services = self.collect()
         return [s for s in services if s.writable]
 
