@@ -3,6 +3,10 @@
 from pathlib import Path
 
 from argus.collectors.base import BaseCollector
+from argus.permissions import is_group_or_world_writable
+
+
+SUDOERS_DIR = "/etc/sudoers.d"
 
 
 class SudoCollector(BaseCollector):
@@ -59,15 +63,13 @@ class SudoCollector(BaseCollector):
         return nopasswd
 
     def get_writable_sudoers_files(self) -> list[str]:
-        """Check for writable sudoers include files."""
-        import os
-
+        """Check for group/world-writable sudoers include files."""
         writable: list[str] = []
-        sudoers_dir = Path("/etc/sudoers.d")
+        sudoers_dir = Path(SUDOERS_DIR)
         if sudoers_dir.is_dir():
             try:
                 for entry in sudoers_dir.iterdir():
-                    if entry.is_file() and os.access(str(entry), os.W_OK):
+                    if entry.is_file() and is_group_or_world_writable(entry):
                         writable.append(str(entry))
             except PermissionError:
                 pass

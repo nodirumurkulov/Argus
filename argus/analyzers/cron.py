@@ -1,7 +1,10 @@
 """Cron job security analyzer for ARGUS."""
 
+from pathlib import Path
+
 from argus.analyzers.base import BaseAnalyzer
 from argus.models import CronEntry, Finding
+from argus.permissions import is_group_or_world_writable
 
 
 SUSPICIOUS_COMMANDS = [
@@ -80,29 +83,32 @@ class CronAnalyzer(BaseAnalyzer):
     def _check_world_writable_scripts(
         self, entries: list[CronEntry], findings: list[Finding]
     ) -> None:
-        """Check if cron jobs reference world-writable scripts."""
-        import os
-
+        """Check if cron jobs reference group/world-writable scripts."""
         for index, entry in enumerate(entries, 1):
             cmd_parts = entry.command.split()
             if not cmd_parts:
                 continue
             script = cmd_parts[0]
-            if script.startswith("/") and os.path.isfile(script):
-                if os.access(script, os.W_OK):
-                    findings.append(self._make_finding(
-                        finding_id=f"ARGUS-CRON-003-{index:03d}",
-                        title="Cron job references writable script",
-                        severity="high",
-                        description=(
-                            f"Cron job for '{entry.user}' runs '{script}' which "
-                            "is writable. An attacker could modify this script."
-                        ),
-                        evidence=[
-                            f"User: {entry.user}",
-                            f"Script: {script}",
-                            f"Schedule: {entry.schedule}",
-                        ],
-                        recommendation=f"Fix permissions: chmod 755 {script}",
-                        mitre=["T1053.003"],
-                    ))
+            script_path = Path(script)
+            if (
+                not script.startswith("/")
+                or not script_path.is_file()
+                or not is_group_or_world_writable(script_path)
+            ):
+                continue
+            findings.append(self._make_finding(
+                finding_id=f"ARGUS-CRON-003-{index:03d}",
+                title="Cron job references group/world-writable script",
+                severity="high",
+                description=(
+                    f"Cron job for '{entry.user}' runs '{script}' which is writable "
+                    "by group or other users. An attacker could modify this script."
+                ),
+                evidence=[
+                    f"User: {entry.user}",
+                    f"Script: {script}",
+                    f"Schedule: {entry.schedule}",
+                ],
+                recommendation=f"Fix permissions: chmod 755 {script}",
+                mitre=["T1053.003"],
+            ))

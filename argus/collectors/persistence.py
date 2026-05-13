@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 from argus.collectors.base import BaseCollector
+from argus.permissions import is_group_or_world_writable
 
 
 PERSISTENCE_PATHS = [
@@ -41,7 +42,7 @@ class PersistenceCollector(BaseCollector):
         for path in PERSISTENCE_PATHS:
             p = Path(path)
             if p.is_file():
-                if os.access(path, os.W_OK):
+                if is_group_or_world_writable(path):
                     findings.append(f"writable:{path}")
                 else:
                     findings.append(f"exists:{path}")
