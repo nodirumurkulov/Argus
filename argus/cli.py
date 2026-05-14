@@ -3,11 +3,7 @@
 from typing import Annotated
 
 import typer
-from rich.align import Align
 from rich.console import Console
-from rich.console import Group
-from rich.panel import Panel
-from rich.table import Table
 
 from argus import __version__
 from argus.models import Finding, SeverityLevel
@@ -62,71 +58,43 @@ app.add_typer(config_app, name="config")
 
 
 WORDMARK = r"""
-█████╗  ██████╗   ██████╗ ██╗   ██╗ ██████╗
-██╔══██╗ ██╔══██╗ ██╔════╝ ██║   ██║██╔════╝
-███████║ ██████╔╝ ██║  ███╗██║   ██║╚█████╗ 
-██╔══██║ ██╔══██╗ ██║   ██║██║   ██║ ╚═══██╗
-██║  ██║ ██║  ██║ ╚██████╔╝╚██████╔╝██████╔╝
-╚═╝  ╚═╝ ╚═╝  ╚═╝  ╚═════╝  ╚═════╝ ╚═════╝ 
+     █████╗  ██████╗   ██████╗ ██╗   ██╗ ██████╗
+    ██╔══██╗ ██╔══██╗ ██╔════╝ ██║   ██║██╔════╝
+    ███████║ ██████╔╝ ██║  ███╗██║   ██║╚█████╗ 
+    ██╔══██║ ██╔══██╗ ██║   ██║██║   ██║ ╚═══██╗
+    ██║  ██║ ██║  ██║ ╚██████╔╝╚██████╔╝██████╔╝
+    ╚═╝  ╚═╝ ╚═╝  ╚═╝  ╚═════╝  ╚═════╝ ╚═════╝ 
+"""
+
+BANNER = f"""
+\033[91m{WORDMARK}\033[0m
+    \033[91mARGUS\033[0m \033[90m// Offline Blue-Team Security Assistant  |  Engine: rules + local AI  |  Linux\033[0m
+    \033[90m────────────────────────────────────────────────────────────────────────\033[0m
+
+    \033[94m[*]\033[0m Mission: collect evidence, detect risk, produce remediation
+    \033[92m[+]\033[0m Mode: read-only local host analysis
+    \033[93m[!]\033[0m Defensive use only: harden, triage, report
+
+    \033[90m┌─ COMMAND CENTER ───────────────────────────────────────────────────┐\033[0m
+      \033[92m[1]\033[0m  scan-host      Audit SSH, users, sudo, ports, firewall, persistence
+      \033[92m[2]\033[0m  analyze-logs   Detect brute-force, spraying, root login activity
+      \033[92m[3]\033[0m  report         Export findings as Markdown or JSON
+      \033[92m[4]\033[0m  config         Manage local ARGUS settings
+    \033[90m└─────────────────────────────────────────────────────────────────────┘\033[0m
+
+    \033[90mExamples:\033[0m
+      \033[36margus scan-host --severity high\033[0m
+      \033[36margus analyze-logs /var/log/auth.log --severity medium\033[0m
+      \033[36margus report --input findings.json --output report.md\033[0m
+
+    \033[91margus>\033[0m ready to defend.
 """
 
 
 def show_banner() -> None:
     """Display the ARGUS startup banner."""
-    status = Table.grid(padding=(0, 2))
-    status.add_column(style="bright_black", no_wrap=True)
-    status.add_column(style="bold white", no_wrap=True)
-    status.add_column(style="bright_black", no_wrap=True)
-    status.add_column(style="bold white", no_wrap=True)
-    status.add_row("MODE", "[green]READ-ONLY[/green]", "ENGINE", "[cyan]RULES + AI[/cyan]")
-    status.add_row("SCOPE", "[blue]LOCAL HOST[/blue]", "POSTURE", "[red]HARDEN[/red]")
-
-    mission_board = Table.grid(padding=(0, 2))
-    mission_board.add_column(style="bold bright_cyan", no_wrap=True)
-    mission_board.add_column(style="bold white", no_wrap=True)
-    mission_board.add_column(style="white", no_wrap=True)
-    mission_board.add_row("scan-host", "HOST POSTURE", "ssh / users / sudo / firewall")
-    mission_board.add_row("analyze-logs", "AUTH TRIAGE", "brute-force / spray / root logins")
-    mission_board.add_row("report", "EVIDENCE", "markdown / json / remediation")
-    mission_board.add_row("config", "CONTROL", "local settings / offline model")
-
-    signal_bar = Table.grid(expand=True)
-    signal_bar.add_column(justify="center")
-    signal_bar.add_column(justify="center")
-    signal_bar.add_column(justify="center")
-    signal_bar.add_row(
-        "[cyan]SSH HARDENING[/cyan]",
-        "[red]AUTH ANOMALIES[/red]",
-        "[magenta]MITRE MAPPED[/magenta]",
-    )
-
-    dashboard = Group(
-        Align.center(f"[bold bright_cyan]{WORDMARK.strip()}[/bold bright_cyan]"),
-        Align.center("[bold white]OFFLINE BLUE-TEAM SECURITY CONSOLE[/bold white]"),
-        Align.center("[bright_black]collect evidence  |  detect risk  |  produce remediation[/bright_black]"),
-        "",
-        Panel(status, border_style="bright_black", style="white on black", padding=(0, 2)),
-        Panel(signal_bar, border_style="bright_black", style="white on black", padding=(0, 2)),
-        Panel(
-            mission_board,
-            title="[bold cyan]MISSION BOARD[/bold cyan]",
-            border_style="cyan",
-            style="white on black",
-            padding=(1, 2),
-        ),
-        Align.center(
-            "[bright_black]prompt[/bright_black] [green]argus[/green] "
-            "[bright_black]›[/bright_black] scan-host --severity high"
-        ),
-    )
-    console.print(Panel(
-        dashboard,
-        title="[bold bright_cyan] ARGUS // DEFENSIVE OPS [/bold bright_cyan]",
-        subtitle="[blue]defend[/blue] [bright_black]//[/bright_black] [red]detect[/red]",
-        border_style="bright_cyan",
-        style="white on black",
-        padding=(1, 2),
-    ))
+    console.clear()
+    print(BANNER)
 
 
 def version_callback(value: bool) -> None:
