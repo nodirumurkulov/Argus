@@ -58,7 +58,7 @@ app.add_typer(config_app, name="config")
 
 
 BANNER = """
-\033[91m
+\033[31m
      █████╗  ██████╗   ██████╗ ██╗   ██╗ ██████╗
     ██╔══██╗ ██╔══██╗ ██╔════╝ ██║   ██║██╔════╝
     ███████║ ██████╔╝ ██║  ███╗██║   ██║╚█████╗
@@ -69,15 +69,15 @@ BANNER = """
     \033[90mARGUS // Offline Blue-Team Security Assistant  |  Rules + Local AI  |  Linux\033[0m
     \033[90m─────────────────────────────────────────────────────────────────────\033[0m
 
-    \033[94m[*]\033[0m Mission: collect evidence, detect risk, and produce remediation
-    \033[92m[+]\033[0m Mode: read-only local host analysis
-    \033[93m[!]\033[0m Defensive only: harden, triage, report
+    \033[34m[*]\033[0m Mission: collect evidence, detect risk, and produce remediation
+    \033[32m[+]\033[0m Mode: read-only local host analysis
+    \033[33m[!]\033[0m Defensive only: harden, triage, report
 
     \033[90m┌─ COMMAND CENTER ───────────────────────────────────────────────┐\033[0m
-      \033[92m[1]\033[0m  scan-host      Audit SSH, users, sudo, ports, firewall
-      \033[92m[2]\033[0m  analyze-logs   Detect brute-force, spraying, root logins
-      \033[92m[3]\033[0m  report         Export findings as Markdown or JSON
-      \033[92m[4]\033[0m  config         Manage local ARGUS settings
+      \033[32m[1]\033[0m  scan-host      Audit SSH, users, sudo, ports, firewall
+      \033[32m[2]\033[0m  analyze-logs   Detect brute-force, spraying, root logins
+      \033[32m[3]\033[0m  report         Export findings as Markdown or JSON
+      \033[32m[4]\033[0m  config         Manage local ARGUS settings
     \033[90m└─────────────────────────────────────────────────────────────────┘\033[0m
 
     \033[90mExamples\033[0m
@@ -85,7 +85,7 @@ BANNER = """
       \033[36margus analyze-logs /var/log/auth.log --severity medium\033[0m
       \033[36margus report --input findings.json --output report.md\033[0m
 
-    \033[91margus>\033[0m ready to defend.
+    \033[31margus>\033[0m ready to defend.
 """
 
 
