@@ -57,45 +57,42 @@ config_app = typer.Typer(
 app.add_typer(config_app, name="config")
 
 
-BANNER = r"""
-[cyan]
-        ╔══════════════════════════════════════════════════════════════════╗
-        ║                                                                ║
-        ║     █████╗ ██████╗  ██████╗ ██╗   ██╗███████╗                  ║
-        ║    ██╔══██╗██╔══██╗██╔════╝ ██║   ██║██╔════╝                  ║
-        ║    ███████║██████╔╝██║  ███╗██║   ██║███████╗                  ║
-        ║    ██╔══██║██╔══██╗██║   ██║██║   ██║╚════██║                  ║
-        ║    ██║  ██║██║  ██║╚██████╔╝╚██████╔╝███████║                  ║
-        ║    ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚══════╝                  ║
-        ║                                                                ║
-        ╚══════════════════════════════════════════════════════════════════╝
-[/cyan]
-[bold red]          ◈ OFFLINE AI DEFENSIVE SECURITY ASSISTANT ◈[/bold red]
-[dim]         ──────── DETECT • ANALYZE • HARDEN • DEFEND ────────[/dim]
+BANNER = """
+\033[91m
+     █████╗  ██████╗   ██████╗ ██╗   ██╗ ██████╗
+    ██╔══██╗ ██╔══██╗ ██╔════╝ ██║   ██║██╔════╝
+    ███████║ ██████╔╝ ██║  ███╗██║   ██║╚█████╗
+    ██╔══██║ ██╔══██╗ ██║   ██║██║   ██║ ╚═══██╗
+    ██║  ██║ ██║  ██║ ╚██████╔╝╚██████╔╝██████╔╝
+    ╚═╝  ╚═╝ ╚═╝  ╚═╝  ╚═════╝  ╚═════╝ ╚═════╝
+\033[0m
+    \033[90mARGUS // Offline Blue-Team Security Assistant  |  Rules + Local AI  |  Linux\033[0m
+    \033[90m─────────────────────────────────────────────────────────────────────\033[0m
 
-[bold white]  ╭──────────────────────────────────────────────────────────────╮[/bold white]
-[bold white]  │[/bold white] [italic cyan] "See everything. Understand everything. Secure everything." [/italic cyan] [bold white]│[/bold white]
-[bold white]  │[/bold white]                                           [dim]— ARGUS[/dim]            [bold white]│[/bold white]
-[bold white]  ╰──────────────────────────────────────────────────────────────╯[/bold white]
+    \033[94m[*]\033[0m Mission: collect evidence, detect risk, and produce remediation
+    \033[92m[+]\033[0m Mode: read-only local host analysis
+    \033[93m[!]\033[0m Defensive only: harden, triage, report
 
-[bold red]  ┌─ CAPABILITIES ─────────────────────────────────────────────┐[/bold red]
-[bold red]  │[/bold red]  [cyan]◉[/cyan]  Host Security Scanning         [dim]scan-host[/dim]              [bold red]│[/bold red]
-[bold red]  │[/bold red]  [cyan]◉[/cyan]  Log Analysis & Threat Detection [dim]analyze-logs[/dim]          [bold red]│[/bold red]
-[bold red]  │[/bold red]  [cyan]◉[/cyan]  Incident Investigation          [dim]investigate[/dim]           [bold red]│[/bold red]
-[bold red]  │[/bold red]  [cyan]◉[/cyan]  Detection Rule Generation       [dim]generate-rule[/dim]         [bold red]│[/bold red]
-[bold red]  │[/bold red]  [cyan]◉[/cyan]  Security Report Generation      [dim]report[/dim]                [bold red]│[/bold red]
-[bold red]  │[/bold red]  [cyan]◉[/cyan]  Offline LLM Analysis            [dim]via Ollama[/dim]            [bold red]│[/bold red]
-[bold red]  └─────────────────────────────────────────────────────────────┘[/bold red]
+    \033[90m┌─ COMMAND CENTER ───────────────────────────────────────────────┐\033[0m
+      \033[92m[1]\033[0m  scan-host      Audit SSH, users, sudo, ports, firewall
+      \033[92m[2]\033[0m  analyze-logs   Detect brute-force, spraying, root logins
+      \033[92m[3]\033[0m  report         Export findings as Markdown or JSON
+      \033[92m[4]\033[0m  config         Manage local ARGUS settings
+    \033[90m└─────────────────────────────────────────────────────────────────┘\033[0m
 
-[bold cyan]  MODEL:[/bold cyan] [white]ollama (local)[/white]  │  [bold cyan]ENGINE:[/bold cyan] [white]rule-based + AI[/white]  │  [bold cyan]OS:[/bold cyan] [white]Linux[/white]
+    \033[90mExamples\033[0m
+      \033[36margus scan-host --severity high\033[0m
+      \033[36margus analyze-logs /var/log/auth.log --severity medium\033[0m
+      \033[36margus report --input findings.json --output report.md\033[0m
 
-[dim green]  [argus@localhost ~]$  ready to defend. _[/dim green]
+    \033[91margus>\033[0m ready to defend.
 """
 
 
 def show_banner() -> None:
     """Display the ARGUS startup banner."""
-    console.print(BANNER)
+    console.clear()
+    print(BANNER)
 
 
 def version_callback(value: bool) -> None:

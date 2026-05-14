@@ -8,6 +8,31 @@
   <img src="docs/cli-screenshot.png" alt="ARGUS CLI" width="700">
 </p>
 
+```text
+     █████╗  ██████╗   ██████╗ ██╗   ██╗ ██████╗
+    ██╔══██╗ ██╔══██╗ ██╔════╝ ██║   ██║██╔════╝
+    ███████║ ██████╔╝ ██║  ███╗██║   ██║╚█████╗
+    ██╔══██║ ██╔══██╗ ██║   ██║██║   ██║ ╚═══██╗
+    ██║  ██║ ██║  ██║ ╚██████╔╝╚██████╔╝██████╔╝
+    ╚═╝  ╚═╝ ╚═╝  ╚═╝  ╚═════╝  ╚═════╝ ╚═════╝
+
+    ARGUS // Offline Blue-Team Security Assistant  |  Rules + Local AI  |  Linux
+    ─────────────────────────────────────────────────────────────────────
+
+    [*] Mission: collect evidence, detect risk, and produce remediation
+    [+] Mode: read-only local host analysis
+    [!] Defensive only: harden, triage, report
+
+    ┌─ COMMAND CENTER ───────────────────────────────────────────────┐
+      [1]  scan-host      Audit SSH, users, sudo, ports, firewall
+      [2]  analyze-logs   Detect brute-force, spraying, root logins
+      [3]  report         Export findings as Markdown or JSON
+      [4]  config         Manage local ARGUS settings
+    └─────────────────────────────────────────────────────────────────┘
+
+    argus> ready to defend.
+```
+
 <p align="center">
   <em>"See everything. Understand everything. Secure everything."</em>
 </p>
@@ -47,7 +72,7 @@ ARGUS is the **defensive counterpart** to offensive security tools. It focuses e
 - **Local LLM support** via [Ollama](https://ollama.ai/) for AI-powered analysis
 - **Works without LLM** — rule-based findings are always available
 - **MITRE ATT&CK mapping** for all findings
-- **Beautiful CLI** using Rich tables, panels, and colored output
+- **Beautiful CLI** with terminal-first dashboards, Rich tables, and colored output
 - **Multiple output formats** — Markdown and JSON reports
 
 ---
