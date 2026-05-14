@@ -194,22 +194,26 @@ def scan_host(
 
 @app.command()
 def analyze_logs(
-    log_file: Annotated[str, typer.Argument(help="Path to log file to analyze.")],
+    log_file: Annotated[str, typer.Argument(help="Path to log file or directory to analyze.")],
     output: Annotated[str | None, typer.Option("--output", "-o",
                        help="Output file path.")] = None,
     format: Annotated[str, typer.Option("--format", "-f",
                       callback=validate_output_format,
                       help="Output format: markdown or json.")] = "markdown",
     no_llm: Annotated[bool, typer.Option("--no-llm",
-                      help="Skip LLM enrichment.")] = False,
+                       help="Skip LLM enrichment.")] = False,
     severity: Annotated[str | None, typer.Option("--severity", "-s",
-                         callback=validate_severity,
-                         help="Filter by minimum severity: critical, high, medium, low, info.")] = None,
+                          callback=validate_severity,
+                          help="Filter by minimum severity: critical, high, medium, low, info.")] = None,
+    discover_rotated: Annotated[bool, typer.Option("--discover-rotated", "-r",
+                                 help="Also read rotated archives (.1, .2.gz, etc.) automatically.")] = False,
+    max_lines: Annotated[int, typer.Option("--max-lines", "-m",
+                           help="Maximum lines to read per file.")] = 200_000,
 ) -> None:
     """Analyze Linux authentication and system logs.
 
     Detects brute-force attempts, password spraying, suspicious logins,
-    sudo abuse, and more.
+    sudo abuse, and more. Supports plain and .gz compressed log files.
     """
     from pathlib import Path
 
@@ -229,19 +233,42 @@ def analyze_logs(
     console.print("[bold cyan]╰────────────────────────────────────────────╯[/bold cyan]\n")
 
     log_path = Path(log_file)
-    if not log_path.is_file():
+    if not log_path.exists():
         console.print(f"[bold red]Error:[/bold red] Log file not found: {log_file}")
         raise typer.Exit(code=1)
 
-    console.print(f"[bold]Analyzing:[/bold] {log_file}\n")
-    collector = LogCollector()
-    log_lines = collector._read_log(str(log_path))
+    if log_path.is_dir():
+        log_files = sorted(str(p) for p in log_path.iterdir() if p.is_file())
+        if not log_files:
+            console.print("[yellow]No files found in directory.[/yellow]")
+            raise typer.Exit()
+        console.print(f"[bold]Analyzing {len(log_files)} files in:[/bold] {log_file}\n")
+        collector = LogCollector()
+        merged_lines: list[str] = []
+        for lf in log_files:
+            lines = collector._read_log(lf, max_lines)
+            if lines:
+                merged_lines.extend(lines)
+        log_lines = merged_lines
+    else:
+        console.print(f"[bold]Analyzing:[/bold] {log_file}\n")
+        collector = LogCollector()
+        log_lines = collector.collect(
+            log_path=str(log_path),
+            max_lines=max_lines,
+            discover_rotated=discover_rotated,
+        )
 
     if not log_lines:
         console.print("[yellow]No log entries found.[/yellow]")
         raise typer.Exit()
 
-    console.print(f"  [green]✓[/green] Read {len(log_lines)} log entries\n")
+    source_desc = log_file
+    if discover_rotated:
+        rotated = LogCollector.discover_rotated_paths(str(log_path))
+        if rotated:
+            source_desc = f"{log_file} + {len(rotated)} rotated archive(s)"
+    console.print(f"  [green]✓[/green] Read {len(log_lines)} log entries from {source_desc}\n")
 
     analyzer = AuthLogAnalyzer()
     findings = analyzer.analyze(log_lines)
