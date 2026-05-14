@@ -8,6 +8,16 @@ from argus.cli import app
 runner = CliRunner()
 
 
+def test_root_command_renders_metatron_style_dashboard() -> None:
+    """Root command should render the ARGUS terminal dashboard."""
+    result = runner.invoke(app, [])
+
+    assert result.exit_code == 0
+    assert "ARGUS // Offline Blue-Team Security Assistant" in result.output
+    assert "COMMAND CENTER" in result.output
+    assert "argus>" in result.output
+
+
 def test_scan_host_rejects_invalid_output_format() -> None:
     """scan-host should fail before collecting data for unsupported formats."""
     result = runner.invoke(app, ["scan-host", "--format", "xml"])
