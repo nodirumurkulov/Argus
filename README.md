@@ -4,30 +4,36 @@
 
 > **Local-first blue-team analysis for Linux.**
 
-```text
-     █████╗  ██████╗   ██████╗ ██╗   ██╗ ██████╗
+<pre style="background: #0d1117; color: #8b949e; padding: 16px; border-radius: 6px; line-height: 1.3; overflow-x: auto;">
+
+<span style="color: #cc0000;">     █████╗  ██████╗   ██████╗ ██╗   ██╗ ██████╗
     ██╔══██╗ ██╔══██╗ ██╔════╝ ██║   ██║██╔════╝
     ███████║ ██████╔╝ ██║  ███╗██║   ██║╚█████╗
     ██╔══██║ ██╔══██╗ ██║   ██║██║   ██║ ╚═══██╗
     ██║  ██║ ██║  ██║ ╚██████╔╝╚██████╔╝██████╔╝
-    ╚═╝  ╚═╝ ╚═╝  ╚═╝  ╚═════╝  ╚═════╝ ╚═════╝
+    ╚═╝  ╚═╝ ╚═╝  ╚═╝  ╚═════╝  ╚═════╝ ╚═════╝</span>
 
-    ARGUS // Offline Blue-Team Security Assistant  |  Rules + Local AI  |  Linux
-    ─────────────────────────────────────────────────────────────────────
+    <span style="color: #8b949e;">ARGUS // Offline Blue-Team Security Assistant  |  Rules + Local AI  |  Linux
+    ─────────────────────────────────────────────────────────────────────</span>
 
-    [*] Mission: collect evidence, detect risk, and produce remediation
-    [+] Mode: read-only local host analysis
-    [!] Defensive only: harden, triage, report
+    <span style="color: #0066cc;">[*]</span> Mission: collect evidence, detect risk, and produce remediation
+    <span style="color: #0066cc;">[+]</span> Mode: read-only local host analysis
+    <span style="color: #cc0000;">[!]</span> Defensive only: harden, triage, report
 
-    ┌─ COMMAND CENTER ───────────────────────────────────────────────┐
-      [1]  scan-host      Audit SSH, users, sudo, ports, firewall
-      [2]  analyze-logs   Detect brute-force, spraying, root logins
-      [3]  report         Export findings as Markdown or JSON
-      [4]  config         Manage local ARGUS settings
-    └─────────────────────────────────────────────────────────────────┘
+    <span style="color: #8b949e;">┌─ COMMAND CENTER ───────────────────────────────────────────────┐</span>
+      <span style="color: #0066cc;">[1]</span>  scan-host      Audit SSH, users, sudo, ports, firewall
+      <span style="color: #0066cc;">[2]</span>  analyze-logs   Detect brute-force, spraying, root logins
+      <span style="color: #0066cc;">[3]</span>  report         Export findings as Markdown or JSON
+      <span style="color: #0066cc;">[4]</span>  config         Manage local ARGUS settings
+    <span style="color: #8b949e;">└─────────────────────────────────────────────────────────────────┘</span>
 
-    argus> ready to defend.
-```
+    <span style="color: #8b949e;">Examples</span>
+      <span style="color: #0066cc;">argus scan-host --severity high</span>
+      <span style="color: #0066cc;">argus analyze-logs /var/log/auth.log --severity medium</span>
+      <span style="color: #0066cc;">argus report --input findings.json --output report.md</span>
+
+    <span style="color: #cc0000;">argus></span> ready to defend.
+</pre>
 
 <p align="center">
   <em>"See everything. Understand everything. Secure everything."</em>
