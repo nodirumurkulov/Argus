@@ -62,7 +62,7 @@ app.add_typer(config_app, name="config")
 
 
 WORDMARK = r"""
-█████╗  ██████╗   ██████╗ ██╗   ██╗ ██████╗
+ █████╗  ██████╗   ██████╗ ██╗   ██╗ ██████╗
 ██╔══██╗ ██╔══██╗ ██╔════╝ ██║   ██║██╔════╝
 ███████║ ██████╔╝ ██║  ███╗██║   ██║╚█████╗ 
 ██╔══██║ ██╔══██╗ ██║   ██║██║   ██║ ╚═══██╗
@@ -73,56 +73,43 @@ WORDMARK = r"""
 
 def show_banner() -> None:
     """Display the ARGUS startup banner."""
-    status = Table.grid(padding=(0, 2))
-    status.add_column(style="bright_black", no_wrap=True)
-    status.add_column(style="bold white", no_wrap=True)
-    status.add_column(style="bright_black", no_wrap=True)
-    status.add_column(style="bold white", no_wrap=True)
-    status.add_row("MODE", "[green]READ-ONLY[/green]", "ENGINE", "[cyan]RULES + AI[/cyan]")
-    status.add_row("SCOPE", "[blue]LOCAL HOST[/blue]", "POSTURE", "[red]HARDEN[/red]")
-
-    mission_board = Table.grid(padding=(0, 2))
-    mission_board.add_column(style="bold bright_cyan", no_wrap=True)
-    mission_board.add_column(style="bold white", no_wrap=True)
-    mission_board.add_column(style="white", no_wrap=True)
-    mission_board.add_row("scan-host", "HOST POSTURE", "ssh / users / sudo / firewall")
-    mission_board.add_row("analyze-logs", "AUTH TRIAGE", "brute-force / spray / root logins")
-    mission_board.add_row("report", "EVIDENCE", "markdown / json / remediation")
-    mission_board.add_row("config", "CONTROL", "local settings / offline model")
-
-    signal_bar = Table.grid(expand=True)
-    signal_bar.add_column(justify="center")
-    signal_bar.add_column(justify="center")
-    signal_bar.add_column(justify="center")
-    signal_bar.add_row(
-        "[cyan]SSH HARDENING[/cyan]",
-        "[red]AUTH ANOMALIES[/red]",
-        "[magenta]MITRE MAPPED[/magenta]",
+    status = Table.grid(expand=True)
+    status.add_column(justify="center")
+    status.add_column(justify="center")
+    status.add_column(justify="center")
+    status.add_row(
+        "[bright_black]MODE[/bright_black] [bold green]READ-ONLY[/bold green]",
+        "[bright_black]ENGINE[/bright_black] [bold cyan]RULE-BASED[/bold cyan]",
+        "[bright_black]AI[/bright_black] [bold magenta]LOCAL OLLAMA[/bold magenta]",
     )
+
+    commands = Table.grid(padding=(0, 3))
+    commands.add_column(style="bold cyan", no_wrap=True)
+    commands.add_column(style="white")
+    commands.add_row("scan-host", "audit SSH, users, sudo, firewall, ports, persistence")
+    commands.add_row("analyze-logs", "detect brute-force, spraying, suspicious auth events")
+    commands.add_row("report", "render exported findings as Markdown or JSON")
+    commands.add_row("config", "manage local ARGUS settings")
 
     dashboard = Group(
         Align.center(f"[bold bright_cyan]{WORDMARK.strip()}[/bold bright_cyan]"),
-        Align.center("[bold white]OFFLINE BLUE-TEAM SECURITY CONSOLE[/bold white]"),
-        Align.center("[bright_black]collect evidence  |  detect risk  |  produce remediation[/bright_black]"),
+        Align.center("[bold white]OFFLINE DEFENSIVE SECURITY ASSISTANT[/bold white]"),
+        Align.center("[bright_black]local-first Linux posture scanning and incident triage[/bright_black]"),
         "",
         Panel(status, border_style="bright_black", style="white on black", padding=(0, 2)),
-        Panel(signal_bar, border_style="bright_black", style="white on black", padding=(0, 2)),
         Panel(
-            mission_board,
-            title="[bold cyan]MISSION BOARD[/bold cyan]",
+            commands,
+            title="[bold bright_cyan]COMMAND DECK[/bold bright_cyan]",
             border_style="cyan",
             style="white on black",
             padding=(1, 2),
         ),
-        Align.center(
-            "[bright_black]prompt[/bright_black] [green]argus[/green] "
-            "[bright_black]›[/bright_black] scan-host --severity high"
-        ),
+        Align.center("[green]argus online[/green] [bright_black]::[/bright_black] detect | analyze | harden | defend"),
     )
     console.print(Panel(
         dashboard,
-        title="[bold bright_cyan] ARGUS // DEFENSIVE OPS [/bold bright_cyan]",
-        subtitle="[blue]defend[/blue] [bright_black]//[/bright_black] [red]detect[/red]",
+        title="[bold bright_cyan] ARGUS [/bold bright_cyan]",
+        subtitle="[bright_black]blue-team control plane[/bright_black]",
         border_style="bright_cyan",
         style="white on black",
         padding=(1, 2),
