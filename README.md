@@ -4,10 +4,6 @@
 
 > **Local-first blue-team analysis for Linux.**
 
-<p align="center">
-  <img src="docs/cli-screenshot.png" alt="ARGUS CLI" width="700">
-</p>
-
 ```text
      █████╗  ██████╗   ██████╗ ██╗   ██╗ ██████╗
     ██╔══██╗ ██╔══██╗ ██╔════╝ ██║   ██║██╔════╝
