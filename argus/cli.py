@@ -5,9 +5,7 @@ from typing import Annotated
 import typer
 from rich.align import Align
 from rich.console import Console
-from rich.console import Group
 from rich.panel import Panel
-from rich.table import Table
 
 from argus import __version__
 from argus.models import Finding, SeverityLevel
@@ -61,58 +59,35 @@ config_app = typer.Typer(
 app.add_typer(config_app, name="config")
 
 
-WORDMARK = r"""
- █████╗  ██████╗   ██████╗ ██╗   ██╗ ██████╗
-██╔══██╗ ██╔══██╗ ██╔════╝ ██║   ██║██╔════╝
-███████║ ██████╔╝ ██║  ███╗██║   ██║╚█████╗ 
-██╔══██║ ██╔══██╗ ██║   ██║██║   ██║ ╚═══██╗
-██║  ██║ ██║  ██║ ╚██████╔╝╚██████╔╝██████╔╝
-╚═╝  ╚═╝ ╚═╝  ╚═╝  ╚═════╝  ╚═════╝ ╚═════╝ 
+BANNER = r"""
+[bold cyan]   ___    ____   ______  __  _______[/bold cyan]
+[bold cyan]  /   |  / __ \ / ____/ / / / / ___/[/bold cyan]
+[bold cyan] / /| | / /_/ // / __  / / / /\__ \ [/bold cyan]
+[bold cyan]/ ___ |/ _, _// /_/ / / /_/ /___/ / [/bold cyan]
+[bold cyan]/_/  |_/_/ |_| \____/  \____//____/  [/bold cyan]
+
+[bold white]Offline Defensive Security Assistant[/bold white]
+[dim]Local-first Linux posture scanning, log triage, and reporting[/dim]
+
+[bright_black]COMMANDS[/bright_black]
+[cyan]scan-host[/cyan]     host posture and hardening checks
+[cyan]analyze-logs[/cyan]  SSH brute-force and auth event triage
+[cyan]report[/cyan]        render exported findings as markdown or JSON
+[cyan]config[/cyan]        manage local ARGUS settings
+
+[bright_black]ENGINE[/bright_black] rule-based  [bright_black]MODEL[/bright_black] local Ollama optional  [bright_black]MODE[/bright_black] read-only
+[green]argus ready[/green] [dim]detect | analyze | harden | defend[/dim]
 """
 
 
 def show_banner() -> None:
     """Display the ARGUS startup banner."""
-    status = Table.grid(expand=True)
-    status.add_column(justify="center")
-    status.add_column(justify="center")
-    status.add_column(justify="center")
-    status.add_row(
-        "[bright_black]MODE[/bright_black] [bold green]READ-ONLY[/bold green]",
-        "[bright_black]ENGINE[/bright_black] [bold cyan]RULE-BASED[/bold cyan]",
-        "[bright_black]AI[/bright_black] [bold magenta]LOCAL OLLAMA[/bold magenta]",
-    )
-
-    commands = Table.grid(padding=(0, 3))
-    commands.add_column(style="bold cyan", no_wrap=True)
-    commands.add_column(style="white")
-    commands.add_row("scan-host", "audit SSH, users, sudo, firewall, ports, persistence")
-    commands.add_row("analyze-logs", "detect brute-force, spraying, suspicious auth events")
-    commands.add_row("report", "render exported findings as Markdown or JSON")
-    commands.add_row("config", "manage local ARGUS settings")
-
-    dashboard = Group(
-        Align.center(f"[bold bright_cyan]{WORDMARK.strip()}[/bold bright_cyan]"),
-        Align.center("[bold white]OFFLINE DEFENSIVE SECURITY ASSISTANT[/bold white]"),
-        Align.center("[bright_black]local-first Linux posture scanning and incident triage[/bright_black]"),
-        "",
-        Panel(status, border_style="bright_black", style="white on black", padding=(0, 2)),
-        Panel(
-            commands,
-            title="[bold bright_cyan]COMMAND DECK[/bold bright_cyan]",
-            border_style="cyan",
-            style="white on black",
-            padding=(1, 2),
-        ),
-        Align.center("[green]argus online[/green] [bright_black]::[/bright_black] detect | analyze | harden | defend"),
-    )
     console.print(Panel(
-        dashboard,
-        title="[bold bright_cyan] ARGUS [/bold bright_cyan]",
-        subtitle="[bright_black]blue-team control plane[/bright_black]",
+        Align.center(BANNER.strip(), vertical="middle"),
         border_style="bright_cyan",
+        padding=(1, 4),
         style="white on black",
-        padding=(1, 2),
+        subtitle="[bright_black]offline-first blue-team analysis[/bright_black]",
     ))
 
 
