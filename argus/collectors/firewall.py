@@ -42,9 +42,11 @@ class FirewallCollector(BaseCollector):
         output = self.safe_run_command(["ufw", "status", "verbose"])
         if output is None:
             return FirewallStatus()
-        status = FirewallStatus(backend="ufw")
+        status = FirewallStatus(backend="ufw", detected_backends=["ufw"])
         for line in output.splitlines():
             line = line.strip()
+            if not line:
+                continue
             if line.startswith("Status:"):
                 active_str = line.split(":", 1)[1].strip()
                 status.active = active_str.lower() == "active"
