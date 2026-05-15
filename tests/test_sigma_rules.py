@@ -57,3 +57,15 @@ def test_root_login_rule_contains_root_login_detection() -> None:
         " for root from ",
     ]
     assert data["level"] == "high"
+
+
+def test_all_supported_scenarios_render_valid_yaml() -> None:
+    """Every supported scenario should render parseable YAML with required fields."""
+    for scenario in supported_sigma_scenarios():
+        data = yaml.safe_load(render_sigma_yaml(get_sigma_rule(scenario)))
+
+        assert data["title"].startswith("ARGUS")
+        assert data["id"].startswith("argus-")
+        assert data["logsource"]["product"] == "linux"
+        assert "detection" in data
+        assert "condition" in data["detection"]
