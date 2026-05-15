@@ -112,6 +112,7 @@ class FirewallStatus(BaseModel):
 
     active: bool = False
     backend: str = ""
+    detected_backends: list[str] = Field(default_factory=list)
     rules: list[str] = Field(default_factory=list)
     default_policy: str = ""
 
