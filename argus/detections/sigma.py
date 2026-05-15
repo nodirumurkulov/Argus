@@ -112,6 +112,38 @@ def password_spraying_rule() -> SigmaRule:
     )
 
 
+def root_login_rule() -> SigmaRule:
+    """Generate a Sigma rule for direct root SSH logins."""
+    return SigmaRule(
+        title="ARGUS Direct Root SSH Login",
+        rule_id="argus-linux-ssh-root-login",
+        description=(
+            "Detects successful direct SSH authentication as root. Direct root SSH "
+            "access should be disabled or tightly controlled."
+        ),
+        logsource=LINUX_SSHD_LOGSOURCE,
+        detection={
+            "selection": {
+                "message|contains|all": [
+                    "Accepted",
+                    " for root from ",
+                ],
+            },
+            "condition": "selection",
+        },
+        falsepositives=[
+            "Break-glass administrative access on explicitly approved systems",
+            "Legacy systems that still permit direct root SSH login",
+        ],
+        level="high",
+        tags=["attack.persistence", "attack.t1078", "attack.t1021.004"],
+        references=[
+            "https://attack.mitre.org/techniques/T1078/",
+            "https://attack.mitre.org/techniques/T1021/004/",
+        ],
+    )
+
+
 @dataclass(frozen=True)
 class SigmaRule:
     """A minimal Sigma-style rule representation."""
