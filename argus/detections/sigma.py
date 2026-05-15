@@ -83,6 +83,35 @@ def ssh_bruteforce_rule() -> SigmaRule:
     )
 
 
+def password_spraying_rule() -> SigmaRule:
+    """Generate a Sigma rule for SSH password spraying indicators."""
+    return SigmaRule(
+        title="ARGUS SSH Password Spraying Indicators",
+        rule_id="argus-linux-ssh-password-spraying",
+        description=(
+            "Detects SSH authentication failures against multiple users, including "
+            "invalid users, that may indicate password spraying activity."
+        ),
+        logsource=LINUX_SSHD_LOGSOURCE,
+        detection={
+            "selection_failed": {
+                "message|contains": "Failed password for",
+            },
+            "selection_invalid": {
+                "message|contains": "invalid user",
+            },
+            "condition": "selection_failed and selection_invalid",
+        },
+        falsepositives=[
+            "Internet-facing SSH service receiving commodity login noise",
+            "Security testing against explicitly authorized hosts",
+        ],
+        level="high",
+        tags=["attack.credential_access", "attack.t1110", "attack.t1110.003"],
+        references=ARGUS_RULE_REFERENCES,
+    )
+
+
 @dataclass(frozen=True)
 class SigmaRule:
     """A minimal Sigma-style rule representation."""
