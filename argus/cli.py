@@ -381,7 +381,7 @@ def generate_rule(
         path.write_text(rendered)
         console.print(f"[green]Sigma rule written to:[/green] {output}")
         return
-    console.print(rendered, markup=False)
+    print(rendered)
 
 
 @app.command()
