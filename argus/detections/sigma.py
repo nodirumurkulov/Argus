@@ -28,6 +28,21 @@ SCENARIO_ALIASES = {
     "success-after-failures": "successful-after-failures",
 }
 
+LINUX_SSHD_LOGSOURCE = {
+    "product": "linux",
+    "service": "sshd",
+}
+
+COMMON_FALSE_POSITIVES = [
+    "Legitimate administrator activity during maintenance windows",
+    "Misconfigured automation repeatedly attempting SSH authentication",
+]
+
+ARGUS_RULE_REFERENCES = [
+    "https://attack.mitre.org/techniques/T1110/",
+    "https://attack.mitre.org/techniques/T1021/004/",
+]
+
 
 def supported_sigma_scenarios() -> dict[str, str]:
     """Return supported scenario names and descriptions."""
