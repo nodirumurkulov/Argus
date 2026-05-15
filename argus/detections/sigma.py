@@ -1,5 +1,7 @@
 """Sigma detection rule generation for ARGUS."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -56,6 +58,29 @@ def normalize_sigma_scenario(scenario: str) -> str:
     if normalized not in SUPPORTED_SCENARIOS:
         raise UnknownSigmaScenario(scenario)
     return normalized
+
+
+def ssh_bruteforce_rule() -> SigmaRule:
+    """Generate a Sigma rule for SSH brute-force attempts."""
+    return SigmaRule(
+        title="ARGUS SSH Brute Force Attempts",
+        rule_id="argus-linux-ssh-bruteforce",
+        description=(
+            "Detects repeated SSH password authentication failures that may indicate "
+            "a brute-force attack against local accounts."
+        ),
+        logsource=LINUX_SSHD_LOGSOURCE,
+        detection={
+            "selection": {
+                "message|contains": "Failed password for",
+            },
+            "condition": "selection",
+        },
+        falsepositives=COMMON_FALSE_POSITIVES,
+        level="high",
+        tags=["attack.credential_access", "attack.t1110", "attack.t1110.001"],
+        references=ARGUS_RULE_REFERENCES,
+    )
 
 
 @dataclass(frozen=True)
