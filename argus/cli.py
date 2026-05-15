@@ -331,7 +331,9 @@ def generate_rule(
     scenario: Annotated[str | None, typer.Option("--scenario", "-s",
                         help="Scenario name, e.g. ssh-bruteforce.")] = None,
     from_file: Annotated[str | None, typer.Option("--from",
-                         help="Generate rules from findings JSON file.")] = None,
+                          help="Generate rules from findings JSON file.")] = None,
+    output: Annotated[str | None, typer.Option("--output", "-o",
+                      help="Output file path.")] = None,
 ) -> None:
     """Generate defensive detection rules.
 
@@ -341,8 +343,45 @@ def generate_rule(
         console.print(f"[bold red]Unknown rule type:[/bold red] {type}")
         console.print(f"[dim]Available: {', '.join(RULE_TYPES)}[/dim]")
         raise typer.Exit(code=1)
-    console.print(f"[bold cyan]ARGUS Rule Generation:[/bold cyan] {type}")
-    console.print("[dim]This command will be fully implemented in a future update.[/dim]")
+    if type != "sigma":
+        console.print(f"[bold yellow]{type} generation is not implemented yet.[/bold yellow]")
+        console.print("[dim]Available now: sigma[/dim]")
+        raise typer.Exit(code=1)
+    if from_file:
+        console.print("[bold yellow]Generating rules from findings JSON is not implemented yet.[/bold yellow]")
+        raise typer.Exit(code=1)
+
+    from pathlib import Path
+
+    from argus.detections import (
+        UnknownSigmaScenario,
+        get_sigma_rule,
+        render_sigma_yaml,
+        supported_sigma_scenarios,
+    )
+
+    if not scenario:
+        console.print("[bold cyan]Available Sigma scenarios:[/bold cyan]")
+        for name, description in supported_sigma_scenarios().items():
+            console.print(f"  [cyan]{name}[/cyan]  [dim]{description}[/dim]")
+        console.print("\n[dim]Usage: argus generate-rule --type sigma --scenario ssh-bruteforce[/dim]")
+        return
+
+    try:
+        rule = get_sigma_rule(scenario)
+    except UnknownSigmaScenario:
+        console.print(f"[bold red]Unknown Sigma scenario:[/bold red] {scenario}")
+        console.print(f"[dim]Available: {', '.join(supported_sigma_scenarios())}[/dim]")
+        raise typer.Exit(code=1) from None
+
+    rendered = render_sigma_yaml(rule)
+    if output:
+        path = Path(output)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(rendered)
+        console.print(f"[green]Sigma rule written to:[/green] {output}")
+        return
+    print(rendered)
 
 
 @app.command()

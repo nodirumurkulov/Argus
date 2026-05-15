@@ -147,9 +147,16 @@ argus investigate --case privilege-escalation
 
 ```bash
 argus generate-rule --type sigma --scenario ssh-bruteforce
-argus generate-rule --type auditd --scenario suspicious-user-creation
-argus generate-rule --type yara --scenario linux-webshell
+argus generate-rule --type sigma --scenario password-spraying
+argus generate-rule --type sigma --scenario root-login --output root-login.yml
 ```
+
+Initial Sigma scenarios:
+
+- `ssh-bruteforce` — repeated SSH password failures
+- `password-spraying` — failed SSH attempts against multiple usernames
+- `root-login` — direct successful SSH login as root
+- `successful-after-failures` — successful SSH login after repeated failures
 
 ### Generate a report
 
