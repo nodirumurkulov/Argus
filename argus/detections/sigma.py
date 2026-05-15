@@ -6,6 +6,43 @@ from typing import Any
 import yaml
 
 
+class UnknownSigmaScenario(ValueError):
+    """Raised when a requested Sigma scenario is not supported."""
+
+
+SUPPORTED_SCENARIOS = {
+    "ssh-bruteforce": "SSH brute-force authentication failures",
+    "password-spraying": "Password spraying across multiple SSH usernames",
+    "root-login": "Direct successful SSH login as root",
+    "successful-after-failures": "Successful SSH login after repeated failures",
+}
+
+SCENARIO_ALIASES = {
+    "ssh-brute-force": "ssh-bruteforce",
+    "bruteforce": "ssh-bruteforce",
+    "brute-force": "ssh-bruteforce",
+    "spraying": "password-spraying",
+    "password-spray": "password-spraying",
+    "root-ssh-login": "root-login",
+    "successful-login-after-failures": "successful-after-failures",
+    "success-after-failures": "successful-after-failures",
+}
+
+
+def supported_sigma_scenarios() -> dict[str, str]:
+    """Return supported scenario names and descriptions."""
+    return SUPPORTED_SCENARIOS.copy()
+
+
+def normalize_sigma_scenario(scenario: str) -> str:
+    """Normalize scenario aliases and validate support."""
+    normalized = scenario.strip().lower().replace("_", "-")
+    normalized = SCENARIO_ALIASES.get(normalized, normalized)
+    if normalized not in SUPPORTED_SCENARIOS:
+        raise UnknownSigmaScenario(scenario)
+    return normalized
+
+
 @dataclass(frozen=True)
 class SigmaRule:
     """A minimal Sigma-style rule representation."""
