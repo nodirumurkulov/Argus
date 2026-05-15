@@ -106,17 +106,25 @@ class FirewallCollector(BaseCollector):
             for line in output.splitlines()
             if line.strip() and not line.strip().startswith("#")
         ]
-        has_rules = any(
-            rule for rule in rules if not rule.startswith("-P")
-        )
-        default_policy = ""
-        for rule in rules:
-            if rule.startswith("-P INPUT"):
-                default_policy = rule.split()[-1] if len(rule.split()) >= 3 else ""
-                break
+        default_policy = self._extract_iptables_input_policy(rules)
         return FirewallStatus(
-            active=has_rules or bool(rules),
+            active=self._iptables_has_active_policy_or_rules(rules, default_policy),
             backend="iptables",
+            detected_backends=["iptables"],
             rules=rules,
             default_policy=default_policy,
         )
+
+    @staticmethod
+    def _extract_iptables_input_policy(rules: list[str]) -> str:
+        """Extract the iptables INPUT default policy."""
+        for rule in rules:
+            if rule.startswith("-P INPUT"):
+                return rule.split()[-1] if len(rule.split()) >= 3 else ""
+        return ""
+
+    @staticmethod
+    def _iptables_has_active_policy_or_rules(rules: list[str], default_policy: str) -> bool:
+        """Return true when iptables has filtering rules or a restrictive INPUT policy."""
+        has_explicit_rules = any(rule for rule in rules if not rule.startswith("-P"))
+        return has_explicit_rules or default_policy.upper() in {"DROP", "REJECT"}
