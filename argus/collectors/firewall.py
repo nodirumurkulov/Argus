@@ -69,11 +69,32 @@ class FirewallCollector(BaseCollector):
         ]
         if not rules:
             return FirewallStatus()
+        default_policy = self._extract_nftables_input_policy(rules)
         return FirewallStatus(
-            active=bool(rules),
+            active=self._nftables_has_filtering_rules(rules),
             backend="nftables",
+            detected_backends=["nftables"],
             rules=rules[:50],
+            default_policy=default_policy,
         )
+
+    @staticmethod
+    def _nftables_has_filtering_rules(rules: list[str]) -> bool:
+        """Return true when nftables output contains meaningful filter rules."""
+        return any(
+            " accept" in rule or " drop" in rule or " reject" in rule
+            for rule in rules
+        )
+
+    @staticmethod
+    def _extract_nftables_input_policy(rules: list[str]) -> str:
+        """Extract the nftables input chain policy when present."""
+        for rule in rules:
+            if "hook input" in rule and "policy" in rule:
+                parts = rule.split("policy", 1)[1].strip().split()
+                if parts:
+                    return parts[0].rstrip(";")
+        return ""
 
     def _collect_iptables(self) -> FirewallStatus:
         """Collect firewall rules from iptables as fallback."""
