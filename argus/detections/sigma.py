@@ -176,6 +176,20 @@ def successful_after_failures_rule() -> SigmaRule:
     )
 
 
+SCENARIO_BUILDERS = {
+    "ssh-bruteforce": ssh_bruteforce_rule,
+    "password-spraying": password_spraying_rule,
+    "root-login": root_login_rule,
+    "successful-after-failures": successful_after_failures_rule,
+}
+
+
+def get_sigma_rule(scenario: str) -> SigmaRule:
+    """Build a Sigma rule for a supported scenario."""
+    normalized = normalize_sigma_scenario(scenario)
+    return SCENARIO_BUILDERS[normalized]()
+
+
 @dataclass(frozen=True)
 class SigmaRule:
     """A minimal Sigma-style rule representation."""
