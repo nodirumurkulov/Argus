@@ -22,6 +22,7 @@ class FirewallAnalyzer(BaseAnalyzer):
     ) -> None:
         """Check if firewall is inactive."""
         if not firewall.active:
+            detected = ", ".join(firewall.detected_backends) or "none detected"
             findings.append(self._make_finding(
                 finding_id="ARGUS-FW-001",
                 title="No active firewall detected",
@@ -32,6 +33,7 @@ class FirewallAnalyzer(BaseAnalyzer):
                 ),
                 evidence=[
                     f"Backend: {firewall.backend or 'none detected'}",
+                    f"Detected backends: {detected}",
                     "Status: inactive",
                 ],
                 recommendation="Enable ufw: sudo ufw enable",
@@ -46,6 +48,7 @@ class FirewallAnalyzer(BaseAnalyzer):
             return
         policy_lower = firewall.default_policy.lower()
         if "accept" in policy_lower or "allow" in policy_lower:
+            detected = ", ".join(firewall.detected_backends) or firewall.backend
             findings.append(self._make_finding(
                 finding_id="ARGUS-FW-002",
                 title="Firewall default policy is permissive",
@@ -56,6 +59,7 @@ class FirewallAnalyzer(BaseAnalyzer):
                 ),
                 evidence=[
                     f"Backend: {firewall.backend}",
+                    f"Detected backends: {detected}",
                     f"Default policy: {firewall.default_policy}",
                 ],
                 recommendation="Set default policy to deny/drop incoming traffic.",
