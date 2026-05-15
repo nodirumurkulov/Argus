@@ -30,13 +30,12 @@ class FirewallCollector(BaseCollector):
 
     def collect(self) -> FirewallStatus:
         """Collect firewall status, trying ufw first then nftables then iptables."""
-        status = self._collect_ufw()
-        if status.backend:
-            return status
-        status = self._collect_nftables()
-        if status.backend:
-            return status
-        return self._collect_iptables()
+        statuses = [
+            self._collect_ufw(),
+            self._collect_nftables(),
+            self._collect_iptables(),
+        ]
+        return self._select_status(statuses)
 
     def _collect_ufw(self) -> FirewallStatus:
         """Collect firewall status from ufw."""
