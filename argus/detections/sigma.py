@@ -144,6 +144,38 @@ def root_login_rule() -> SigmaRule:
     )
 
 
+def successful_after_failures_rule() -> SigmaRule:
+    """Generate a Sigma rule for successful SSH login after failures."""
+    return SigmaRule(
+        title="ARGUS Successful SSH Login After Failures",
+        rule_id="argus-linux-ssh-success-after-failures",
+        description=(
+            "Detects SSH failure and success events needed to correlate successful "
+            "authentication after repeated failed attempts from the same source."
+        ),
+        logsource=LINUX_SSHD_LOGSOURCE,
+        detection={
+            "selection_failure": {
+                "message|contains": "Failed password for",
+            },
+            "selection_success": {
+                "message|contains": "Accepted",
+            },
+            "condition": "selection_failure or selection_success",
+        },
+        falsepositives=[
+            "Users mistyping passwords before a legitimate successful login",
+            "Password rotations that temporarily cause failed login attempts",
+        ],
+        level="critical",
+        tags=["attack.credential_access", "attack.t1110", "attack.t1078"],
+        references=[
+            "https://attack.mitre.org/techniques/T1110/",
+            "https://attack.mitre.org/techniques/T1078/",
+        ],
+    )
+
+
 @dataclass(frozen=True)
 class SigmaRule:
     """A minimal Sigma-style rule representation."""
