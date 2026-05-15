@@ -9,6 +9,25 @@ class FirewallCollector(BaseCollector):
 
     name = "firewall"
 
+    @staticmethod
+    def _merge_detected_backends(statuses: list[FirewallStatus]) -> list[str]:
+        """Return all firewall backends detected during collection."""
+        return [status.backend for status in statuses if status.backend]
+
+    @staticmethod
+    def _select_status(statuses: list[FirewallStatus]) -> FirewallStatus:
+        """Prefer the first active backend, falling back to first detected backend."""
+        detected = FirewallCollector._merge_detected_backends(statuses)
+        for status in statuses:
+            if status.active:
+                status.detected_backends = detected
+                return status
+        for status in statuses:
+            if status.backend:
+                status.detected_backends = detected
+                return status
+        return FirewallStatus(detected_backends=detected)
+
     def collect(self) -> FirewallStatus:
         """Collect firewall status, trying ufw first then nftables then iptables."""
         status = self._collect_ufw()
