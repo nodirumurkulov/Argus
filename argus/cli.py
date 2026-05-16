@@ -453,6 +453,10 @@ def compare_reports(
     from argus.drift import compare_report_files
     from argus.output import render_drift_section, render_drift_summary
 
+    if not baseline or not current:
+        console.print("[bold red]Error:[/bold red] --baseline and --current are required.")
+        raise typer.Exit(code=1)
+
     result = compare_report_files(baseline, current)
     render_drift_summary(result.summary())
     render_drift_section("New Findings", result.new)
