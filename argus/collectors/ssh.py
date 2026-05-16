@@ -110,7 +110,9 @@ class SSHCollector(BaseCollector):
             config.login_grace_time = int(grace_time)
         except ValueError:
             config.login_grace_time = 120
-        config.x11_forwarding = config_dict.get("x11forwarding", "unknown")
+        config.x11_forwarding = _normalize_scalar(
+            config_dict.get("x11forwarding", "unknown")
+        )
         config.protocol = config_dict.get("protocol", "")
 
     def collect_authorized_keys(self) -> dict[str, list[str]]:
