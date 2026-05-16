@@ -3,6 +3,16 @@
 from argus.collectors.ssh import SSHCollector
 
 
+class FakeSSHCollector(SSHCollector):
+    """SSH collector with deterministic command and file output."""
+
+    def __init__(self, commands: dict[tuple[str, ...], str | None] | None = None) -> None:
+        self.commands = commands or {}
+
+    def safe_run_command(self, command: list[str]) -> str | None:
+        return self.commands.get(tuple(command))
+
+
 def test_ssh_parser_strips_inline_comments() -> None:
     """Fallback parser should ignore comments after directive values."""
     config = SSHCollector()._parse_config("PasswordAuthentication yes # temporary\n")
