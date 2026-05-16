@@ -1,5 +1,8 @@
 """Baseline and drift detection helpers."""
 
+import json
+from pathlib import Path
+
 from pydantic import BaseModel, Field
 
 from argus.models import Finding
@@ -46,3 +49,12 @@ def compare_findings(
         resolved=[baseline[key] for key in sorted(baseline_keys - current_keys)],
         unchanged=[current[key] for key in sorted(current_keys & baseline_keys)],
     )
+
+
+def load_findings_report(path: str | Path) -> list[Finding]:
+    """Load findings from an ARGUS JSON report."""
+    data = json.loads(Path(path).read_text())
+    findings_data = data.get("findings") if isinstance(data, dict) else None
+    if not isinstance(findings_data, list):
+        raise ValueError("expected a JSON object with a findings list")
+    return [Finding(**finding) for finding in findings_data]
