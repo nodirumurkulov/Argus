@@ -42,3 +42,23 @@ def test_generated_fingerprint_is_stable_for_same_issue() -> None:
     )
 
     assert first == second
+
+
+def test_generated_fingerprint_changes_for_different_resources() -> None:
+    """Similar findings on different resources should not deduplicate together."""
+    first = generate_finding_fingerprint(
+        finding_id="ARGUS-SVC-001",
+        category="systemd",
+        title="Writable systemd unit file",
+        severity="high",
+        evidence=["Unit: /etc/systemd/system/app.service"],
+    )
+    second = generate_finding_fingerprint(
+        finding_id="ARGUS-SVC-001",
+        category="systemd",
+        title="Writable systemd unit file",
+        severity="high",
+        evidence=["Unit: /etc/systemd/system/backup.service"],
+    )
+
+    assert first != second
