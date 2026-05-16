@@ -89,6 +89,14 @@ def render_summary_panel(findings: list[Finding], hostname: str = "") -> None:
     ))
 
 
+def render_drift_summary(summary: dict[str, int]) -> None:
+    """Render baseline drift counts."""
+    console.print("[bold cyan]ARGUS Baseline Drift[/bold cyan]")
+    console.print(f"  [bold red]New:[/bold red] {summary['new']}")
+    console.print(f"  [bold green]Resolved:[/bold green] {summary['resolved']}")
+    console.print(f"  [dim]Unchanged:[/dim] {summary['unchanged']}")
+
+
 def render_recommendations(findings: list[Finding]) -> None:
     """Render prioritized remediation recommendations."""
     actionable = [
