@@ -41,11 +41,12 @@ class PersistenceCollector(BaseCollector):
         """Check standard persistence file locations."""
         for path in PERSISTENCE_PATHS:
             p = Path(path)
-            if p.is_file():
-                if is_group_or_world_writable(path):
-                    findings.append(f"writable:{path}")
-                else:
-                    findings.append(f"exists:{path}")
+            if not p.exists():
+                continue
+            if is_group_or_world_writable(path):
+                findings.append(f"writable:{path}")
+            elif p.is_file():
+                findings.append(f"exists:{path}")
 
     def _scan_startup_directories(self, findings: list[str]) -> None:
         """Scan startup directories for scripts."""
