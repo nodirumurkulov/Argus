@@ -17,7 +17,7 @@ app = typer.Typer(
 
 console = Console()
 
-VALID_OUTPUT_FORMATS = {"markdown", "json"}
+VALID_OUTPUT_FORMATS = {"html", "markdown", "json"}
 
 
 def validate_output_format(value: str) -> str:
