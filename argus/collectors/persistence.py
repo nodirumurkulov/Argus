@@ -1,10 +1,9 @@
 """Persistence location scanner for ARGUS."""
 
-import os
 from pathlib import Path
 
 from argus.collectors.base import BaseCollector
-from argus.permissions import is_group_or_world_writable
+from argus.permissions import is_executable_by_mode, is_group_or_world_writable
 
 
 PERSISTENCE_PATHS = [
@@ -41,11 +40,12 @@ class PersistenceCollector(BaseCollector):
         """Check standard persistence file locations."""
         for path in PERSISTENCE_PATHS:
             p = Path(path)
-            if p.is_file():
-                if is_group_or_world_writable(path):
-                    findings.append(f"writable:{path}")
-                else:
-                    findings.append(f"exists:{path}")
+            if not p.exists():
+                continue
+            if is_group_or_world_writable(path):
+                findings.append(f"writable:{path}")
+            elif p.is_file():
+                findings.append(f"exists:{path}")
 
     def _scan_startup_directories(self, findings: list[str]) -> None:
         """Scan startup directories for scripts."""
@@ -56,7 +56,7 @@ class PersistenceCollector(BaseCollector):
             try:
                 for entry in sorted(d.iterdir()):
                     if entry.is_file() and entry.suffix in (".sh", ""):
-                        if os.access(str(entry), os.X_OK):
+                        if is_executable_by_mode(entry):
                             findings.append(f"startup_script:{entry}")
             except PermissionError:
                 pass

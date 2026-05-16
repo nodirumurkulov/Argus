@@ -1,5 +1,6 @@
 """Permission helper and unsafe writable path tests."""
 
+import stat
 from pathlib import Path
 
 from argus.analyzers.cron import CronAnalyzer
@@ -9,7 +10,12 @@ from argus.collectors.persistence import PersistenceCollector
 from argus.collectors.sudo import SudoCollector
 from argus.collectors.systemd import SystemdCollector
 from argus.models import CronEntry
-from argus.permissions import is_group_or_world_writable
+from argus.permissions import (
+    is_group_or_world_writable,
+    is_group_writable,
+    is_world_writable,
+    unsafe_writable_bits,
+)
 
 
 def _write_file(path: Path, mode: int, content: str = "test") -> Path:
@@ -37,6 +43,45 @@ def test_permission_helper_detects_world_writable_file(tmp_path: Path) -> None:
     path = _write_file(tmp_path / "world.conf", 0o602)
 
     assert is_group_or_world_writable(path)
+
+
+def test_permission_helper_returns_unsafe_writable_bits(tmp_path: Path) -> None:
+    """Unsafe mode bit reporting should ignore owner-only write access."""
+    path = _write_file(tmp_path / "mixed.conf", 0o622)
+
+    assert unsafe_writable_bits(path) == stat.S_IWGRP | stat.S_IWOTH
+
+
+def test_permission_helper_distinguishes_group_and_world_bits(
+    tmp_path: Path,
+) -> None:
+    """Callers should be able to distinguish group from world writable paths."""
+    group_path = _write_file(tmp_path / "group.conf", 0o620)
+    world_path = _write_file(tmp_path / "world.conf", 0o602)
+
+    assert is_group_writable(group_path)
+    assert not is_world_writable(group_path)
+    assert not is_group_writable(world_path)
+    assert is_world_writable(world_path)
+
+
+def test_permission_helper_treats_missing_paths_as_safe(tmp_path: Path) -> None:
+    """Missing paths should not produce unsafe writable false positives."""
+    missing_path = tmp_path / "missing.conf"
+
+    assert unsafe_writable_bits(missing_path) == 0
+    assert not is_group_or_world_writable(missing_path)
+
+
+def test_permission_helper_detects_world_writable_directory(tmp_path: Path) -> None:
+    """Directory mode bits should be checked the same way as files."""
+    directory = tmp_path / "profile.d"
+    directory.mkdir()
+    directory.chmod(0o777)
+
+    assert is_group_or_world_writable(directory)
+    assert is_group_writable(directory)
+    assert is_world_writable(directory)
 
 
 def test_cron_analyzer_ignores_owner_writable_script(tmp_path: Path) -> None:
@@ -94,6 +139,39 @@ def test_sudo_collector_reports_group_writable_include_files(
     assert str(unsafe_file) in writable
 
 
+def test_sudo_collector_reports_writable_main_sudoers_file(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """The main sudoers file should be checked in addition to include files."""
+    sudoers_file = _write_file(tmp_path / "sudoers", 0o460)
+    sudoers_dir = tmp_path / "sudoers.d"
+    sudoers_dir.mkdir()
+    monkeypatch.setattr(sudo_module, "SUDOERS_FILE", str(sudoers_file))
+    monkeypatch.setattr(sudo_module, "SUDOERS_DIR", str(sudoers_dir))
+
+    writable = SudoCollector().get_writable_sudoers_files()
+
+    assert writable == [str(sudoers_file)]
+
+
+def test_sudo_collector_reports_writable_include_directory(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """A writable sudoers include directory should be reported as unsafe."""
+    sudoers_file = _write_file(tmp_path / "sudoers", 0o440)
+    sudoers_dir = tmp_path / "sudoers.d"
+    sudoers_dir.mkdir()
+    sudoers_dir.chmod(0o775)
+    monkeypatch.setattr(sudo_module, "SUDOERS_FILE", str(sudoers_file))
+    monkeypatch.setattr(sudo_module, "SUDOERS_DIR", str(sudoers_dir))
+
+    writable = SudoCollector().get_writable_sudoers_files()
+
+    assert writable == [str(sudoers_dir)]
+
+
 def test_persistence_collector_uses_mode_bits_for_writable_files(
     tmp_path: Path,
     monkeypatch,
@@ -112,3 +190,37 @@ def test_persistence_collector_uses_mode_bits_for_writable_files(
 
     assert f"exists:{safe_file}" in findings
     assert f"writable:{unsafe_file}" in findings
+
+
+def test_persistence_collector_reports_writable_directories(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """Persistence directories should be checked for unsafe writable mode bits."""
+    unsafe_dir = tmp_path / "profile.d"
+    unsafe_dir.mkdir()
+    unsafe_dir.chmod(0o775)
+    monkeypatch.setattr(persistence_module, "PERSISTENCE_PATHS", [str(unsafe_dir)])
+
+    findings: list[str] = []
+    PersistenceCollector()._check_persistence_files(findings)
+
+    assert findings == [f"writable:{unsafe_dir}"]
+
+
+def test_persistence_collector_uses_mode_bits_for_startup_scripts(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """Startup script discovery should depend on executable mode bits."""
+    startup_dir = tmp_path / "init.d"
+    startup_dir.mkdir()
+    executable = _write_file(startup_dir / "boot", 0o755)
+    non_executable = _write_file(startup_dir / "note.sh", 0o644)
+    monkeypatch.setattr(persistence_module, "STARTUP_SCRIPT_DIRS", [str(startup_dir)])
+
+    findings: list[str] = []
+    PersistenceCollector()._scan_startup_directories(findings)
+
+    assert f"startup_script:{executable}" in findings
+    assert f"startup_script:{non_executable}" not in findings
