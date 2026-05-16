@@ -1,5 +1,7 @@
 """Baseline drift detection tests."""
 
+import json
+
 from argus.drift import compare_findings
 from argus.models import Finding
 
@@ -48,3 +50,16 @@ def test_drift_result_summary_counts() -> None:
     result = compare_findings([unchanged, resolved], [unchanged, new])
 
     assert result.summary() == {"new": 1, "resolved": 1, "unchanged": 1}
+
+
+def test_load_findings_report_reads_argus_json(tmp_path) -> None:
+    """Report loading should parse findings from ARGUS JSON output."""
+    from argus.drift import load_findings_report
+
+    finding = _finding("ARGUS-TEST-001", "resource:a")
+    report_path = tmp_path / "report.json"
+    report_path.write_text(json.dumps({"findings": [finding.model_dump()]}))
+
+    loaded = load_findings_report(report_path)
+
+    assert loaded == [finding]
