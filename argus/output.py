@@ -127,6 +127,14 @@ def render_drift_section(title: str, findings: list[Finding]) -> None:
         )
 
 
+def _html_list(items: list[str]) -> str:
+    """Render a list of strings as escaped HTML list items."""
+    if not items:
+        return "<p class=\"muted\">None</p>"
+    rendered = "".join(f"<li><code>{escape(item)}</code></li>" for item in items)
+    return f"<ul>{rendered}</ul>"
+
+
 def render_recommendations(findings: list[Finding]) -> None:
     """Render prioritized remediation recommendations."""
     actionable = [
