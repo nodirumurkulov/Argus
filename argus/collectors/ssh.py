@@ -60,7 +60,9 @@ class SSHCollector(BaseCollector):
     def _build_ssh_config(self, config_dict: dict[str, str]) -> SSHConfig:
         """Build SSHConfig model from parsed config dictionary."""
         config = SSHConfig(raw_config=config_dict)
-        config.permit_root_login = config_dict.get("permitrootlogin", "unknown")
+        config.permit_root_login = _normalize_scalar(
+            config_dict.get("permitrootlogin", "unknown")
+        )
         config.password_authentication = config_dict.get(
             "passwordauthentication", "unknown"
         )
