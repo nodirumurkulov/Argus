@@ -83,6 +83,11 @@ class SSHCollector(BaseCollector):
     def _parse_config(self, raw: str) -> SSHConfig:
         """Parse raw sshd_config content into structured data."""
         config_dict: dict[str, str] = {}
+        self._parse_config_lines(raw, config_dict)
+        return self._build_ssh_config(config_dict)
+
+    def _parse_config_lines(self, raw: str, config_dict: dict[str, str]) -> None:
+        """Parse sshd_config lines into a config dictionary."""
         in_match_block = False
         for line in raw.splitlines():
             directive = _parse_directive(line)
@@ -95,7 +100,6 @@ class SSHCollector(BaseCollector):
             if in_match_block:
                 continue
             _store_directive(config_dict, key, value)
-        return self._build_ssh_config(config_dict)
 
     def _build_ssh_config(self, config_dict: dict[str, str]) -> SSHConfig:
         """Build SSHConfig model from parsed config dictionary."""
