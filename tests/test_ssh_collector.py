@@ -6,11 +6,19 @@ from argus.collectors.ssh import SSHCollector
 class FakeSSHCollector(SSHCollector):
     """SSH collector with deterministic command and file output."""
 
-    def __init__(self, commands: dict[tuple[str, ...], str | None] | None = None) -> None:
+    def __init__(
+        self,
+        commands: dict[tuple[str, ...], str | None] | None = None,
+        files: dict[str, str | None] | None = None,
+    ) -> None:
         self.commands = commands or {}
+        self.files = files or {}
 
     def safe_run_command(self, command: list[str]) -> str | None:
         return self.commands.get(tuple(command))
+
+    def safe_read_file(self, path: str) -> str | None:
+        return self.files.get(path)
 
 
 def test_ssh_parser_strips_inline_comments() -> None:
