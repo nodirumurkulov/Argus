@@ -45,12 +45,11 @@ class SSHCollector(BaseCollector):
         """Parse raw sshd_config content into structured data."""
         config_dict: dict[str, str] = {}
         for line in raw.splitlines():
-            line = line.strip()
-            if not line or line.startswith("#"):
+            directive = _parse_directive(line)
+            if directive is None:
                 continue
-            parts = line.split(None, 1)
-            if len(parts) == 2:
-                config_dict[parts[0].lower()] = parts[1]
+            key, value = directive
+            config_dict[key] = value
         return self._build_ssh_config(config_dict)
 
     def _build_ssh_config(self, config_dict: dict[str, str]) -> SSHConfig:
