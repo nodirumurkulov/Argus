@@ -61,6 +61,12 @@ class SSHCollector(BaseCollector):
             return None
         return self._parse_effective_config(output)
 
+    def _parse_effective_config(self, raw: str) -> SSHConfig:
+        """Parse sshd -T output into structured data."""
+        config = self._parse_config(raw)
+        config.source = "sshd -T"
+        return config
+
     def _parse_config(self, raw: str) -> SSHConfig:
         """Parse raw sshd_config content into structured data."""
         config_dict: dict[str, str] = {}
