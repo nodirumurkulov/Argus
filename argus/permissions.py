@@ -4,6 +4,7 @@ import stat
 from pathlib import Path
 
 UNSAFE_WRITABLE_BITS = stat.S_IWGRP | stat.S_IWOTH
+EXECUTABLE_BITS = stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
 
 
 def unsafe_writable_bits(path: str | Path) -> int:
@@ -23,6 +24,15 @@ def is_group_writable(path: str | Path) -> bool:
 def is_world_writable(path: str | Path) -> bool:
     """Return True when the other writable mode bit is set."""
     return bool(unsafe_writable_bits(path) & stat.S_IWOTH)
+
+
+def is_executable_by_mode(path: str | Path) -> bool:
+    """Return True when any executable mode bit is set."""
+    try:
+        mode = Path(path).stat().st_mode
+    except OSError:
+        return False
+    return bool(mode & EXECUTABLE_BITS)
 
 
 def is_group_or_world_writable(path: str | Path) -> bool:
