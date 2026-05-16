@@ -10,7 +10,12 @@ from argus.collectors.persistence import PersistenceCollector
 from argus.collectors.sudo import SudoCollector
 from argus.collectors.systemd import SystemdCollector
 from argus.models import CronEntry
-from argus.permissions import is_group_or_world_writable, unsafe_writable_bits
+from argus.permissions import (
+    is_group_or_world_writable,
+    is_group_writable,
+    is_world_writable,
+    unsafe_writable_bits,
+)
 
 
 def _write_file(path: Path, mode: int, content: str = "test") -> Path:
@@ -45,6 +50,19 @@ def test_permission_helper_returns_unsafe_writable_bits(tmp_path: Path) -> None:
     path = _write_file(tmp_path / "mixed.conf", 0o622)
 
     assert unsafe_writable_bits(path) == stat.S_IWGRP | stat.S_IWOTH
+
+
+def test_permission_helper_distinguishes_group_and_world_bits(
+    tmp_path: Path,
+) -> None:
+    """Callers should be able to distinguish group from world writable paths."""
+    group_path = _write_file(tmp_path / "group.conf", 0o620)
+    world_path = _write_file(tmp_path / "world.conf", 0o602)
+
+    assert is_group_writable(group_path)
+    assert not is_world_writable(group_path)
+    assert not is_group_writable(world_path)
+    assert is_world_writable(world_path)
 
 
 def test_cron_analyzer_ignores_owner_writable_script(tmp_path: Path) -> None:
