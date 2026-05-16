@@ -29,6 +29,11 @@ def _parse_directive(line: str) -> tuple[str, str] | None:
     return _normalize_key(parts[0]), parts[1].strip()
 
 
+def _store_directive(config_dict: dict[str, str], key: str, value: str) -> None:
+    """Store the first fallback value for an sshd directive."""
+    config_dict.setdefault(key, value)
+
+
 def _normalize_scalar(value: str) -> str:
     """Normalize simple sshd scalar values."""
     return value.strip().strip('"\'').lower()
