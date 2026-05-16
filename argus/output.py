@@ -364,3 +364,48 @@ def write_markdown_output(
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines))
     console.print(f"\n[green]Report written to:[/green] {output_path}")
+
+
+def write_html_output(
+    findings: list[Finding],
+    output_path: str,
+    hostname: str = "",
+) -> None:
+    """Write findings to a self-contained HTML report."""
+    sorted_findings = sorted(
+        findings,
+        key=lambda f: list(SeverityLevel).index(f.severity),
+    )
+    finding_cards = "\n".join(_html_finding_card(finding) for finding in sorted_findings)
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ARGUS Security Report</title>
+  <style>{HTML_REPORT_CSS}</style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">ARGUS Security Report</div>
+      <h1>Security Posture Summary</h1>
+      <p class="muted">Host: {escape(hostname) if hostname else 'Unknown'}</p>
+    </header>
+    <section class="metrics">{_html_summary_cards(findings)}</section>
+    <section>
+      <h2>Executive Summary</h2>
+      <p>ARGUS identified {len(findings)} finding(s). Review high-impact findings first and use the recommendations below to prioritize remediation.</p>
+    </section>
+    <section>
+      <h2>Findings</h2>
+      {finding_cards or '<p class="muted">No security findings detected.</p>'}
+    </section>
+  </main>
+</body>
+</html>
+"""
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(html)
+    console.print(f"\n[green]HTML report written to:[/green] {output_path}")
