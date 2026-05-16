@@ -91,3 +91,16 @@ def test_finding_model_preserves_existing_fingerprint() -> None:
     )
 
     assert finding.fingerprint == "external:fingerprint"
+
+
+def test_finding_dump_includes_fingerprint() -> None:
+    """Serialized findings should expose fingerprints to JSON outputs."""
+    finding = Finding(
+        id="ARGUS-SSH-002",
+        title="SSH password authentication is enabled",
+        severity="medium",
+        category="ssh",
+        description="Password authentication is enabled.",
+    )
+
+    assert finding.model_dump()["fingerprint"] == finding.fingerprint
