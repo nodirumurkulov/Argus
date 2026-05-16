@@ -63,8 +63,8 @@ class SSHCollector(BaseCollector):
         config.permit_root_login = _normalize_scalar(
             config_dict.get("permitrootlogin", "unknown")
         )
-        config.password_authentication = config_dict.get(
-            "passwordauthentication", "unknown"
+        config.password_authentication = _normalize_scalar(
+            config_dict.get("passwordauthentication", "unknown")
         )
         config.permit_empty_passwords = config_dict.get(
             "permitemptypasswords", "unknown"
