@@ -21,6 +21,14 @@ SEVERITY_COLORS = {
     SeverityLevel.INFO: "dim",
 }
 
+HTML_SEVERITY_COLORS = {
+    SeverityLevel.CRITICAL: "#ef4444",
+    SeverityLevel.HIGH: "#f97316",
+    SeverityLevel.MEDIUM: "#eab308",
+    SeverityLevel.LOW: "#38bdf8",
+    SeverityLevel.INFO: "#94a3b8",
+}
+
 
 def severity_badge(severity: SeverityLevel) -> Text:
     """Create a colored severity badge."""
