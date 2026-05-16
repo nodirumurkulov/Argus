@@ -8,6 +8,11 @@ from argus.models import SSHConfig
 SSHD_CONFIG_PATH = "/etc/ssh/sshd_config"
 
 
+def _normalize_key(key: str) -> str:
+    """Normalize sshd directive names for internal lookups."""
+    return key.strip().lower()
+
+
 class SSHCollector(BaseCollector):
     """Collect and parse SSH server configuration."""
 
