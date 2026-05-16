@@ -26,3 +26,14 @@ def test_compare_findings_separates_new_resolved_and_unchanged() -> None:
     assert result.new == [new]
     assert result.resolved == [resolved]
     assert result.unchanged == [unchanged]
+
+
+def test_drift_result_reports_change_status() -> None:
+    """Drift result should indicate whether reports differ."""
+    unchanged = _finding("ARGUS-TEST-001", "resource:a")
+
+    same_result = compare_findings([unchanged], [unchanged])
+    changed_result = compare_findings([], [unchanged])
+
+    assert same_result.has_changes is False
+    assert changed_result.has_changes is True
