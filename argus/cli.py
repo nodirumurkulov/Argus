@@ -76,14 +76,14 @@ BANNER = """
     \033[90m┌─ COMMAND CENTER ───────────────────────────────────────────────┐\033[0m
       \033[32m[1]\033[0m  scan-host      Audit SSH, users, sudo, ports, firewall
       \033[32m[2]\033[0m  analyze-logs   Detect brute-force, spraying, root logins
-      \033[32m[3]\033[0m  report         Export findings as Markdown or JSON
+      \033[32m[3]\033[0m  report         Export findings as Markdown, HTML, or JSON
       \033[32m[4]\033[0m  config         Manage local ARGUS settings
     \033[90m└─────────────────────────────────────────────────────────────────┘\033[0m
 
     \033[90mExamples\033[0m
       \033[36margus scan-host --severity high\033[0m
       \033[36margus analyze-logs /var/log/auth.log --severity medium\033[0m
-      \033[36margus report --input findings.json --output report.md\033[0m
+      \033[36margus report --input findings.json --format html --output report.html\033[0m
 
     \033[31margus>\033[0m ready to defend.
 """
