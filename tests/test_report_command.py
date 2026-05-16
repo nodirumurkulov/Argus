@@ -103,3 +103,22 @@ def test_compare_reports_shows_finding_drift(tmp_path: Path) -> None:
     assert "New: 1" in result.output
     assert "Resolved: 1" in result.output
     assert "Unchanged: 1" in result.output
+
+
+def test_compare_reports_rejects_invalid_report(tmp_path: Path) -> None:
+    """compare-reports should fail clearly for invalid report JSON."""
+    baseline_path = tmp_path / "baseline.json"
+    current_path = tmp_path / "current.json"
+    baseline_path.write_text(json.dumps({"not_findings": []}))
+    current_path.write_text(json.dumps({"findings": []}))
+
+    result = runner.invoke(app, [
+        "compare-reports",
+        "--baseline",
+        str(baseline_path),
+        "--current",
+        str(current_path),
+    ])
+
+    assert result.exit_code == 1
+    assert "Invalid report input" in result.output
