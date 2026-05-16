@@ -8,6 +8,37 @@ from argus.models import SSHConfig
 SSHD_CONFIG_PATH = "/etc/ssh/sshd_config"
 
 
+def _normalize_key(key: str) -> str:
+    """Normalize sshd directive names for internal lookups."""
+    return key.strip().lower()
+
+
+def _strip_inline_comment(line: str) -> str:
+    """Remove unquoted sshd_config comments from a line."""
+    return line.split("#", 1)[0].strip()
+
+
+def _parse_directive(line: str) -> tuple[str, str] | None:
+    """Parse one sshd_config directive line."""
+    cleaned = _strip_inline_comment(line)
+    if not cleaned:
+        return None
+    parts = cleaned.split(None, 1)
+    if len(parts) != 2:
+        return None
+    return _normalize_key(parts[0]), parts[1].strip()
+
+
+def _normalize_scalar(value: str) -> str:
+    """Normalize simple sshd scalar values."""
+    return value.strip().strip('"\'').lower()
+
+
+def _split_csv(value: str) -> list[str]:
+    """Split comma-delimited sshd algorithm lists."""
+    return [item.strip().lower() for item in value.split(",") if item.strip()]
+
+
 class SSHCollector(BaseCollector):
     """Collect and parse SSH server configuration."""
 
@@ -24,23 +55,24 @@ class SSHCollector(BaseCollector):
         """Parse raw sshd_config content into structured data."""
         config_dict: dict[str, str] = {}
         for line in raw.splitlines():
-            line = line.strip()
-            if not line or line.startswith("#"):
+            directive = _parse_directive(line)
+            if directive is None:
                 continue
-            parts = line.split(None, 1)
-            if len(parts) == 2:
-                config_dict[parts[0].lower()] = parts[1]
+            key, value = directive
+            config_dict[key] = value
         return self._build_ssh_config(config_dict)
 
     def _build_ssh_config(self, config_dict: dict[str, str]) -> SSHConfig:
         """Build SSHConfig model from parsed config dictionary."""
         config = SSHConfig(raw_config=config_dict)
-        config.permit_root_login = config_dict.get("permitrootlogin", "unknown")
-        config.password_authentication = config_dict.get(
-            "passwordauthentication", "unknown"
+        config.permit_root_login = _normalize_scalar(
+            config_dict.get("permitrootlogin", "unknown")
         )
-        config.permit_empty_passwords = config_dict.get(
-            "permitemptypasswords", "unknown"
+        config.password_authentication = _normalize_scalar(
+            config_dict.get("passwordauthentication", "unknown")
+        )
+        config.permit_empty_passwords = _normalize_scalar(
+            config_dict.get("permitemptypasswords", "unknown")
         )
         self._parse_port_and_address(config, config_dict)
         self._parse_crypto_settings(config, config_dict)
@@ -64,10 +96,10 @@ class SSHCollector(BaseCollector):
         """Extract cipher and key exchange algorithm settings."""
         ciphers_str = config_dict.get("ciphers", "")
         if ciphers_str:
-            config.ciphers = [c.strip() for c in ciphers_str.split(",")]
+            config.ciphers = _split_csv(ciphers_str)
         kex_str = config_dict.get("kexalgorithms", "")
         if kex_str:
-            config.kex_algorithms = [k.strip() for k in kex_str.split(",")]
+            config.kex_algorithms = _split_csv(kex_str)
 
     def _parse_auth_limits(
         self, config: SSHConfig, config_dict: dict[str, str]
@@ -83,7 +115,9 @@ class SSHCollector(BaseCollector):
             config.login_grace_time = int(grace_time)
         except ValueError:
             config.login_grace_time = 120
-        config.x11_forwarding = config_dict.get("x11forwarding", "unknown")
+        config.x11_forwarding = _normalize_scalar(
+            config_dict.get("x11forwarding", "unknown")
+        )
         config.protocol = config_dict.get("protocol", "")
 
     def collect_authorized_keys(self) -> dict[str, list[str]]:
