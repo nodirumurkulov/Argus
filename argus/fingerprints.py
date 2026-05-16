@@ -1,5 +1,7 @@
 """Stable finding fingerprint helpers."""
 
+import hashlib
+
 FINDING_FINGERPRINT_VERSION = "v1"
 FINGERPRINT_PART_SEPARATOR = "\x1f"
 
@@ -36,3 +38,8 @@ def build_fingerprint_material(
         *normalize_fingerprint_evidence(evidence),
     ]
     return FINGERPRINT_PART_SEPARATOR.join(parts)
+
+
+def hash_fingerprint_material(material: str) -> str:
+    """Hash fingerprint material into a compact stable identifier."""
+    return hashlib.sha256(material.encode("utf-8")).hexdigest()[:32]
