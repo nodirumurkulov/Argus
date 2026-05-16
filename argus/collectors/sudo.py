@@ -6,6 +6,7 @@ from argus.collectors.base import BaseCollector
 from argus.permissions import is_group_or_world_writable
 
 
+SUDOERS_FILE = "/etc/sudoers"
 SUDOERS_DIR = "/etc/sudoers.d"
 
 
@@ -20,8 +21,8 @@ class SudoCollector(BaseCollector):
         Returns a dict mapping usernames/groups to their sudo rules.
         """
         rules: dict[str, list[str]] = {}
-        self._parse_sudoers_file("/etc/sudoers", rules)
-        self._parse_sudoers_directory("/etc/sudoers.d", rules)
+        self._parse_sudoers_file(SUDOERS_FILE, rules)
+        self._parse_sudoers_directory(SUDOERS_DIR, rules)
         return rules
 
     def _parse_sudoers_file(self, path: str, rules: dict[str, list[str]]) -> None:
@@ -63,8 +64,11 @@ class SudoCollector(BaseCollector):
         return nopasswd
 
     def get_writable_sudoers_files(self) -> list[str]:
-        """Check for group/world-writable sudoers include files."""
+        """Check for group/world-writable sudoers files."""
         writable: list[str] = []
+        sudoers_file = Path(SUDOERS_FILE)
+        if sudoers_file.is_file() and is_group_or_world_writable(sudoers_file):
+            writable.append(str(sudoers_file))
         sudoers_dir = Path(SUDOERS_DIR)
         if sudoers_dir.is_dir():
             try:
