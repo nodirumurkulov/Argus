@@ -29,6 +29,11 @@ def _parse_directive(line: str) -> tuple[str, str] | None:
     return _normalize_key(parts[0]), parts[1].strip()
 
 
+def _normalize_scalar(value: str) -> str:
+    """Normalize simple sshd scalar values."""
+    return value.strip().strip('"\'').lower()
+
+
 class SSHCollector(BaseCollector):
     """Collect and parse SSH server configuration."""
 
