@@ -36,6 +36,14 @@ def severity_badge(severity: SeverityLevel) -> Text:
     return Text(severity.value.upper(), style=color)
 
 
+def severity_counts(findings: list[Finding]) -> dict[SeverityLevel, int]:
+    """Count findings by severity."""
+    return {
+        severity: sum(1 for finding in findings if finding.severity == severity)
+        for severity in SeverityLevel
+    }
+
+
 def render_findings_table(findings: list[Finding]) -> None:
     """Render findings as a Rich table."""
     if not findings:
