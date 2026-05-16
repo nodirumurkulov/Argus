@@ -16,3 +16,20 @@ class DriftResult(BaseModel):
 def _findings_by_fingerprint(findings: list[Finding]) -> dict[str, Finding]:
     """Index findings by stable fingerprint."""
     return {finding.fingerprint: finding for finding in findings}
+
+
+def compare_findings(
+    baseline_findings: list[Finding],
+    current_findings: list[Finding],
+) -> DriftResult:
+    """Compare two finding sets using stable fingerprints."""
+    baseline = _findings_by_fingerprint(baseline_findings)
+    current = _findings_by_fingerprint(current_findings)
+    baseline_keys = set(baseline)
+    current_keys = set(current)
+
+    return DriftResult(
+        new=[current[key] for key in sorted(current_keys - baseline_keys)],
+        resolved=[baseline[key] for key in sorted(baseline_keys - current_keys)],
+        unchanged=[current[key] for key in sorted(current_keys & baseline_keys)],
+    )
