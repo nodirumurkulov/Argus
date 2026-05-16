@@ -77,3 +77,17 @@ def test_finding_model_auto_populates_fingerprint() -> None:
     )
 
     assert finding.fingerprint.startswith("v1:")
+
+
+def test_finding_model_preserves_existing_fingerprint() -> None:
+    """Imported findings should keep an existing fingerprint value."""
+    finding = Finding(
+        id="ARGUS-SSH-002",
+        title="SSH password authentication is enabled",
+        severity="medium",
+        category="ssh",
+        description="Password authentication is enabled.",
+        fingerprint="external:fingerprint",
+    )
+
+    assert finding.fingerprint == "external:fingerprint"
