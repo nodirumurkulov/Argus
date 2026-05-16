@@ -1,6 +1,7 @@
 """Rich terminal output rendering for ARGUS findings."""
 
 import json
+from html import escape
 from pathlib import Path
 
 from rich.console import Console
