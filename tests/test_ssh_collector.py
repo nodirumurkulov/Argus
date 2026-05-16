@@ -21,3 +21,14 @@ def test_ssh_parser_normalizes_boolean_values() -> None:
     assert config.permit_root_login == "yes"
     assert config.permit_empty_passwords == "no"
     assert config.x11_forwarding == "yes"
+
+
+def test_ssh_parser_normalizes_algorithm_lists() -> None:
+    """Fallback parser should normalize comma-separated algorithm lists."""
+    config = SSHCollector()._parse_config(
+        "Ciphers AES128-CBC, chacha20-poly1305@openssh.com\n"
+        "KexAlgorithms Diffie-Hellman-Group1-SHA1, curve25519-sha256\n"
+    )
+
+    assert config.ciphers == ["aes128-cbc", "chacha20-poly1305@openssh.com"]
+    assert config.kex_algorithms == ["diffie-hellman-group1-sha1", "curve25519-sha256"]
