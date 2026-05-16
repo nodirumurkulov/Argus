@@ -17,6 +17,14 @@ class DriftResult(BaseModel):
         """Return True when findings changed between reports."""
         return bool(self.new or self.resolved)
 
+    def summary(self) -> dict[str, int]:
+        """Return finding drift counts."""
+        return {
+            "new": len(self.new),
+            "resolved": len(self.resolved),
+            "unchanged": len(self.unchanged),
+        }
+
 
 def _findings_by_fingerprint(findings: list[Finding]) -> dict[str, Finding]:
     """Index findings by stable fingerprint."""
