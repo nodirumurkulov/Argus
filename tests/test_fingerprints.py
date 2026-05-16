@@ -1,6 +1,7 @@
 """Finding fingerprint tests."""
 
 from argus.fingerprints import (
+    generate_finding_fingerprint,
     normalize_fingerprint_evidence,
     normalize_fingerprint_value,
 )
@@ -21,3 +22,23 @@ def test_fingerprint_evidence_normalization_is_deterministic() -> None:
         "passwordauthentication yes",
         "port 22",
     ]
+
+
+def test_generated_fingerprint_is_stable_for_same_issue() -> None:
+    """The same logical issue should produce the same fingerprint."""
+    first = generate_finding_fingerprint(
+        finding_id="ARGUS-SSH-002",
+        category="ssh",
+        title="SSH password authentication is enabled",
+        severity="medium",
+        evidence=["PasswordAuthentication yes"],
+    )
+    second = generate_finding_fingerprint(
+        finding_id="argus-ssh-002",
+        category="SSH",
+        title="ssh password authentication is enabled",
+        severity="MEDIUM",
+        evidence=["  passwordauthentication   YES "],
+    )
+
+    assert first == second
