@@ -60,6 +60,41 @@ def test_report_writes_markdown_from_findings_json(tmp_path: Path) -> None:
     assert "Test finding" in report_path.read_text()
 
 
+def test_report_writes_html_from_findings_json(tmp_path: Path) -> None:
+    """report should render an HTML report from exported findings JSON."""
+    findings_path = tmp_path / "findings.json"
+    report_path = tmp_path / "report.html"
+    findings_path.write_text(json.dumps({
+        "findings": [
+            {
+                "id": "ARGUS-TEST-001",
+                "title": "Test finding",
+                "severity": "high",
+                "category": "test",
+                "description": "A finding used by report command tests.",
+                "evidence": ["example evidence"],
+                "recommendation": "Fix the test issue.",
+                "mitre": ["T0000"],
+                "references": [],
+            }
+        ]
+    }))
+
+    result = runner.invoke(app, [
+        "report",
+        "--input",
+        str(findings_path),
+        "--format",
+        "html",
+        "--output",
+        str(report_path),
+    ])
+
+    assert result.exit_code == 0
+    assert report_path.is_file()
+    assert "<!doctype html>" in report_path.read_text()
+
+
 def test_compare_reports_shows_finding_drift(tmp_path: Path) -> None:
     """compare-reports should show new, resolved, and unchanged findings."""
     baseline_path = tmp_path / "baseline.json"
