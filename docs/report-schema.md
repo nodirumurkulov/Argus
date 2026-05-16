@@ -16,6 +16,7 @@ ARGUS JSON finding exports use schema version `1.0`.
 - `category`: Finding category such as `ssh`, `network`, or `persistence`.
 - `description`: Detailed finding explanation.
 - `evidence`: Evidence strings collected during analysis.
+- `fingerprint`: Stable finding fingerprint for deduplication.
 - `recommendation`: Suggested remediation.
 - `mitre`: MITRE ATT&CK technique IDs.
 - `references`: External reference URLs.
