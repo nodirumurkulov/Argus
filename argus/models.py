@@ -104,6 +104,7 @@ class SSHConfig(BaseModel):
     kex_algorithms: list[str] = Field(default_factory=list)
     protocol: str = ""
     x11_forwarding: str = "unknown"
+    source: str = ""
     raw_config: dict[str, str] = Field(default_factory=dict)
 
 

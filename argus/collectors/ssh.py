@@ -1,11 +1,17 @@
 """SSH configuration collector for ARGUS."""
 
 from pathlib import Path
+from glob import glob
 
 from argus.collectors.base import BaseCollector
 from argus.models import SSHConfig
 
 SSHD_CONFIG_PATH = "/etc/ssh/sshd_config"
+
+
+def _expand_include_pattern(pattern: str) -> list[Path]:
+    """Expand an sshd Include pattern into sorted paths."""
+    return [Path(path) for path in sorted(glob(pattern))]
 
 
 def _normalize_key(key: str) -> str:
@@ -29,6 +35,11 @@ def _parse_directive(line: str) -> tuple[str, str] | None:
     return _normalize_key(parts[0]), parts[1].strip()
 
 
+def _store_directive(config_dict: dict[str, str], key: str, value: str) -> None:
+    """Store the first fallback value for an sshd directive."""
+    config_dict.setdefault(key, value)
+
+
 def _normalize_scalar(value: str) -> str:
     """Normalize simple sshd scalar values."""
     return value.strip().strip('"\'').lower()
@@ -46,21 +57,60 @@ class SSHCollector(BaseCollector):
 
     def collect(self) -> SSHConfig:
         """Read and parse sshd_config into an SSHConfig model."""
+        effective = self._collect_effective_config()
+        if effective is not None:
+            return effective
         raw = self.safe_read_file(SSHD_CONFIG_PATH)
         if raw is None:
             return SSHConfig()
-        return self._parse_config(raw)
+        config = self._parse_config(raw)
+        config.source = SSHD_CONFIG_PATH
+        return config
+
+    def _collect_effective_config(self) -> SSHConfig | None:
+        """Collect effective sshd configuration with sshd -T when available."""
+        output = self.safe_run_command(["sshd", "-T"])
+        if not output:
+            return None
+        return self._parse_effective_config(output)
+
+    def _parse_effective_config(self, raw: str) -> SSHConfig:
+        """Parse sshd -T output into structured data."""
+        config = self._parse_config(raw)
+        config.source = "sshd -T"
+        return config
 
     def _parse_config(self, raw: str) -> SSHConfig:
         """Parse raw sshd_config content into structured data."""
         config_dict: dict[str, str] = {}
+        self._parse_config_lines(raw, config_dict)
+        return self._build_ssh_config(config_dict)
+
+    def _parse_config_lines(self, raw: str, config_dict: dict[str, str]) -> None:
+        """Parse sshd_config lines into a config dictionary."""
+        in_match_block = False
         for line in raw.splitlines():
             directive = _parse_directive(line)
             if directive is None:
                 continue
             key, value = directive
-            config_dict[key] = value
-        return self._build_ssh_config(config_dict)
+            if key == "match":
+                in_match_block = True
+                continue
+            if key == "include":
+                self._parse_include_files(value, config_dict)
+                continue
+            if in_match_block:
+                continue
+            _store_directive(config_dict, key, value)
+
+    def _parse_include_files(self, value: str, config_dict: dict[str, str]) -> None:
+        """Parse included sshd_config files into the fallback config dictionary."""
+        for pattern in value.split():
+            for path in _expand_include_pattern(pattern):
+                raw = self.safe_read_file(str(path))
+                if raw is not None:
+                    self._parse_config_lines(raw, config_dict)
 
     def _build_ssh_config(self, config_dict: dict[str, str]) -> SSHConfig:
         """Build SSHConfig model from parsed config dictionary."""
