@@ -157,3 +157,19 @@ def test_persistence_collector_uses_mode_bits_for_writable_files(
 
     assert f"exists:{safe_file}" in findings
     assert f"writable:{unsafe_file}" in findings
+
+
+def test_persistence_collector_reports_writable_directories(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """Persistence directories should be checked for unsafe writable mode bits."""
+    unsafe_dir = tmp_path / "profile.d"
+    unsafe_dir.mkdir()
+    unsafe_dir.chmod(0o775)
+    monkeypatch.setattr(persistence_module, "PERSISTENCE_PATHS", [str(unsafe_dir)])
+
+    findings: list[str] = []
+    PersistenceCollector()._check_persistence_files(findings)
+
+    assert findings == [f"writable:{unsafe_dir}"]
