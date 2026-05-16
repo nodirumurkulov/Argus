@@ -1,11 +1,17 @@
 """SSH configuration collector for ARGUS."""
 
 from pathlib import Path
+from glob import glob
 
 from argus.collectors.base import BaseCollector
 from argus.models import SSHConfig
 
 SSHD_CONFIG_PATH = "/etc/ssh/sshd_config"
+
+
+def _expand_include_pattern(pattern: str) -> list[Path]:
+    """Expand an sshd Include pattern into sorted paths."""
+    return [Path(path) for path in sorted(glob(pattern))]
 
 
 def _normalize_key(key: str) -> str:
