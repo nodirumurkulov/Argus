@@ -161,6 +161,19 @@ def _html_finding_card(finding: Finding) -> str:
     """
 
 
+def _html_summary_cards(findings: list[Finding]) -> str:
+    """Render severity count cards for an HTML report."""
+    counts = severity_counts(findings)
+    cards = [f"<div class=\"metric total\"><span>{len(findings)}</span><strong>Total</strong></div>"]
+    for severity in SeverityLevel:
+        cards.append(
+            "<div class=\"metric\" style=\"--severity-color: "
+            f"{HTML_SEVERITY_COLORS[severity]}\"><span>{counts[severity]}</span>"
+            f"<strong>{escape(severity.value.title())}</strong></div>"
+        )
+    return "".join(cards)
+
+
 def render_recommendations(findings: list[Finding]) -> None:
     """Render prioritized remediation recommendations."""
     actionable = [
