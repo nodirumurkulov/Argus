@@ -97,9 +97,20 @@ class SSHCollector(BaseCollector):
             if key == "match":
                 in_match_block = True
                 continue
+            if key == "include":
+                self._parse_include_files(value, config_dict)
+                continue
             if in_match_block:
                 continue
             _store_directive(config_dict, key, value)
+
+    def _parse_include_files(self, value: str, config_dict: dict[str, str]) -> None:
+        """Parse included sshd_config files into the fallback config dictionary."""
+        for pattern in value.split():
+            for path in _expand_include_pattern(pattern):
+                raw = self.safe_read_file(str(path))
+                if raw is not None:
+                    self._parse_config_lines(raw, config_dict)
 
     def _build_ssh_config(self, config_dict: dict[str, str]) -> SSHConfig:
         """Build SSHConfig model from parsed config dictionary."""
