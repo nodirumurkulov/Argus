@@ -71,6 +71,8 @@ class SudoCollector(BaseCollector):
             writable.append(str(sudoers_file))
         sudoers_dir = Path(SUDOERS_DIR)
         if sudoers_dir.is_dir():
+            if is_group_or_world_writable(sudoers_dir):
+                writable.append(str(sudoers_dir))
             try:
                 for entry in sudoers_dir.iterdir():
                     if entry.is_file() and is_group_or_world_writable(entry):
