@@ -147,6 +147,7 @@ def scan_host(
         render_host_info,
         render_recommendations,
         render_summary_panel,
+        write_html_output,
         write_json_output,
         write_markdown_output,
     )
@@ -186,6 +187,8 @@ def scan_host(
     if output:
         if format == "json":
             write_json_output(findings, output)
+        elif format == "html":
+            write_html_output(findings, output, hostname=host_data.hostname)
         else:
             write_markdown_output(findings, output, hostname=host_data.hostname)
 
