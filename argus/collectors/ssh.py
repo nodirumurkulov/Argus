@@ -96,10 +96,10 @@ class SSHCollector(BaseCollector):
         """Extract cipher and key exchange algorithm settings."""
         ciphers_str = config_dict.get("ciphers", "")
         if ciphers_str:
-            config.ciphers = [c.strip() for c in ciphers_str.split(",")]
+            config.ciphers = _split_csv(ciphers_str)
         kex_str = config_dict.get("kexalgorithms", "")
         if kex_str:
-            config.kex_algorithms = [k.strip() for k in kex_str.split(",")]
+            config.kex_algorithms = _split_csv(kex_str)
 
     def _parse_auth_limits(
         self, config: SSHConfig, config_dict: dict[str, str]
