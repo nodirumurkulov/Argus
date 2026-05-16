@@ -139,6 +139,22 @@ def test_sudo_collector_reports_group_writable_include_files(
     assert str(unsafe_file) in writable
 
 
+def test_sudo_collector_reports_writable_main_sudoers_file(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """The main sudoers file should be checked in addition to include files."""
+    sudoers_file = _write_file(tmp_path / "sudoers", 0o460)
+    sudoers_dir = tmp_path / "sudoers.d"
+    sudoers_dir.mkdir()
+    monkeypatch.setattr(sudo_module, "SUDOERS_FILE", str(sudoers_file))
+    monkeypatch.setattr(sudo_module, "SUDOERS_DIR", str(sudoers_dir))
+
+    writable = SudoCollector().get_writable_sudoers_files()
+
+    assert writable == [str(sudoers_file)]
+
+
 def test_persistence_collector_uses_mode_bits_for_writable_files(
     tmp_path: Path,
     monkeypatch,
