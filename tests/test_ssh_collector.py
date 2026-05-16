@@ -96,3 +96,18 @@ def test_ssh_fallback_parser_ignores_match_blocks() -> None:
     )
 
     assert config.password_authentication == "no"
+
+
+def test_ssh_fallback_parser_reads_include_files(tmp_path, monkeypatch) -> None:
+    """Fallback parsing should read included sshd_config fragments."""
+    include_file = tmp_path / "hardening.conf"
+    include_file.write_text("PermitRootLogin no\n")
+    monkeypatch.setattr(ssh_module, "SSHD_CONFIG_PATH", "/tmp/sshd_config")
+    collector = FakeSSHCollector(
+        {("sshd", "-T"): None},
+        {"/tmp/sshd_config": f"Include {include_file}\n"},
+    )
+
+    config = collector.collect()
+
+    assert config.permit_root_login == "no"
