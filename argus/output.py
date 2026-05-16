@@ -135,6 +135,32 @@ def _html_list(items: list[str]) -> str:
     return f"<ul>{rendered}</ul>"
 
 
+def _html_finding_card(finding: Finding) -> str:
+    """Render one finding as an HTML card."""
+    color = HTML_SEVERITY_COLORS.get(finding.severity, "#e2e8f0")
+    mitre = ", ".join(escape(item) for item in finding.mitre) or "None"
+    recommendation = escape(finding.recommendation) or "No recommendation provided."
+    return f"""
+    <article class="finding" style="--severity-color: {color}">
+      <div class="finding-header">
+        <span class="severity">{escape(finding.severity.value.upper())}</span>
+        <span class="category">{escape(finding.category)}</span>
+      </div>
+      <h3>{escape(finding.title)}</h3>
+      <p>{escape(finding.description)}</p>
+      <dl>
+        <dt>ID</dt><dd><code>{escape(finding.id)}</code></dd>
+        <dt>Fingerprint</dt><dd><code>{escape(finding.fingerprint)}</code></dd>
+        <dt>MITRE ATT&CK</dt><dd>{mitre}</dd>
+      </dl>
+      <h4>Evidence</h4>
+      {_html_list(finding.evidence)}
+      <h4>Recommendation</h4>
+      <p>{recommendation}</p>
+    </article>
+    """
+
+
 def render_recommendations(findings: list[Finding]) -> None:
     """Render prioritized remediation recommendations."""
     actionable = [
