@@ -12,6 +12,11 @@ class DriftResult(BaseModel):
     resolved: list[Finding] = Field(default_factory=list)
     unchanged: list[Finding] = Field(default_factory=list)
 
+    @property
+    def has_changes(self) -> bool:
+        """Return True when findings changed between reports."""
+        return bool(self.new or self.resolved)
+
 
 def _findings_by_fingerprint(findings: list[Finding]) -> dict[str, Finding]:
     """Index findings by stable fingerprint."""
