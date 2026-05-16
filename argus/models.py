@@ -5,6 +5,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field
 
+from argus.fingerprints import generate_finding_fingerprint
+
 
 REPORT_SCHEMA_VERSION = "1.0"
 
@@ -28,10 +30,23 @@ class Finding(BaseModel):
     category: str = Field(description="Finding category, e.g. ssh, users, network")
     description: str = Field(description="Detailed description of the finding")
     evidence: list[str] = Field(default_factory=list, description="Evidence strings")
+    fingerprint: str = Field(default="", description="Stable finding fingerprint")
     recommendation: str = Field(default="", description="Remediation recommendation")
     mitre: list[str] = Field(default_factory=list, description="MITRE ATT&CK technique IDs")
     references: list[str] = Field(default_factory=list, description="External reference URLs")
     llm_summary: str | None = Field(default=None, description="LLM-generated summary")
+
+    def model_post_init(self, __context: object) -> None:
+        """Populate a stable fingerprint when callers do not provide one."""
+        if self.fingerprint:
+            return
+        self.fingerprint = generate_finding_fingerprint(
+            finding_id=self.id,
+            category=self.category,
+            title=self.title,
+            severity=self.severity.value,
+            evidence=self.evidence,
+        )
 
 
 class UserInfo(BaseModel):
