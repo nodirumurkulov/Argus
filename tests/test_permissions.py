@@ -1,5 +1,6 @@
 """Permission helper and unsafe writable path tests."""
 
+import stat
 from pathlib import Path
 
 from argus.analyzers.cron import CronAnalyzer
@@ -9,7 +10,7 @@ from argus.collectors.persistence import PersistenceCollector
 from argus.collectors.sudo import SudoCollector
 from argus.collectors.systemd import SystemdCollector
 from argus.models import CronEntry
-from argus.permissions import is_group_or_world_writable
+from argus.permissions import is_group_or_world_writable, unsafe_writable_bits
 
 
 def _write_file(path: Path, mode: int, content: str = "test") -> Path:
@@ -37,6 +38,13 @@ def test_permission_helper_detects_world_writable_file(tmp_path: Path) -> None:
     path = _write_file(tmp_path / "world.conf", 0o602)
 
     assert is_group_or_world_writable(path)
+
+
+def test_permission_helper_returns_unsafe_writable_bits(tmp_path: Path) -> None:
+    """Unsafe mode bit reporting should ignore owner-only write access."""
+    path = _write_file(tmp_path / "mixed.conf", 0o622)
+
+    assert unsafe_writable_bits(path) == stat.S_IWGRP | stat.S_IWOTH
 
 
 def test_cron_analyzer_ignores_owner_writable_script(tmp_path: Path) -> None:
