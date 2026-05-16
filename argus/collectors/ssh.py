@@ -18,6 +18,17 @@ def _strip_inline_comment(line: str) -> str:
     return line.split("#", 1)[0].strip()
 
 
+def _parse_directive(line: str) -> tuple[str, str] | None:
+    """Parse one sshd_config directive line."""
+    cleaned = _strip_inline_comment(line)
+    if not cleaned:
+        return None
+    parts = cleaned.split(None, 1)
+    if len(parts) != 2:
+        return None
+    return _normalize_key(parts[0]), parts[1].strip()
+
+
 class SSHCollector(BaseCollector):
     """Collect and parse SSH server configuration."""
 
