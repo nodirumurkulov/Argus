@@ -85,3 +85,14 @@ def test_ssh_fallback_parser_preserves_first_repeated_directive() -> None:
     )
 
     assert config.password_authentication == "no"
+
+
+def test_ssh_fallback_parser_ignores_match_blocks() -> None:
+    """Fallback parsing should ignore conditional Match block overrides."""
+    config = SSHCollector()._parse_config(
+        "PasswordAuthentication no\n"
+        "Match User legacy\n"
+        "  PasswordAuthentication yes\n"
+    )
+
+    assert config.password_authentication == "no"
