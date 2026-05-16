@@ -399,8 +399,6 @@ def report(
     Supports Markdown and JSON output formats.
     """
     import json
-    from pathlib import Path
-
     from pydantic import ValidationError
 
     from argus.output import (
