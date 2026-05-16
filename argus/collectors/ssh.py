@@ -82,7 +82,7 @@ class SSHCollector(BaseCollector):
             if directive is None:
                 continue
             key, value = directive
-            config_dict[key] = value
+            _store_directive(config_dict, key, value)
         return self._build_ssh_config(config_dict)
 
     def _build_ssh_config(self, config_dict: dict[str, str]) -> SSHConfig:
