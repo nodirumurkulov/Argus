@@ -38,3 +38,20 @@ def test_json_output_keeps_required_top_level_fields(tmp_path) -> None:
 
     data = json.loads(output_path.read_text())
     assert set(data) == {"schema_version", "findings", "summary"}
+
+
+def test_json_output_keeps_required_summary_fields(tmp_path) -> None:
+    """Summary schema should remain stable for dashboards and integrations."""
+    output_path = tmp_path / "findings.json"
+
+    write_json_output([], str(output_path))
+
+    data = json.loads(output_path.read_text())
+    assert set(data["summary"]) == {
+        "total",
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "info",
+    }
