@@ -15,6 +15,16 @@ def unsafe_writable_bits(path: str | Path) -> int:
     return mode & UNSAFE_WRITABLE_BITS
 
 
+def is_group_writable(path: str | Path) -> bool:
+    """Return True when the group writable mode bit is set."""
+    return bool(unsafe_writable_bits(path) & stat.S_IWGRP)
+
+
+def is_world_writable(path: str | Path) -> bool:
+    """Return True when the other writable mode bit is set."""
+    return bool(unsafe_writable_bits(path) & stat.S_IWOTH)
+
+
 def is_group_or_world_writable(path: str | Path) -> bool:
     """Return True when a path is writable by group or other users.
 
