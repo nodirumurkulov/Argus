@@ -55,3 +55,31 @@ def test_json_output_keeps_required_summary_fields(tmp_path) -> None:
         "low",
         "info",
     }
+
+
+def test_json_output_keeps_required_finding_fields(tmp_path) -> None:
+    """Finding schema should keep fields used by downstream consumers."""
+    output_path = tmp_path / "findings.json"
+    finding = Finding(
+        id="ARGUS-TEST-001",
+        title="Test finding",
+        severity="high",
+        category="test",
+        description="Used by schema tests.",
+    )
+
+    write_json_output([finding], str(output_path))
+
+    data = json.loads(output_path.read_text())
+    assert set(data["findings"][0]) == {
+        "id",
+        "title",
+        "severity",
+        "category",
+        "description",
+        "evidence",
+        "recommendation",
+        "mitre",
+        "references",
+        "llm_summary",
+    }
