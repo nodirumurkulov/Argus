@@ -28,3 +28,13 @@ def test_json_output_includes_schema_version(tmp_path) -> None:
 
     data = json.loads(output_path.read_text())
     assert data["schema_version"] == REPORT_SCHEMA_VERSION
+
+
+def test_json_output_keeps_required_top_level_fields(tmp_path) -> None:
+    """Schema contract should fail if required top-level fields disappear."""
+    output_path = tmp_path / "findings.json"
+
+    write_json_output([], str(output_path))
+
+    data = json.loads(output_path.read_text())
+    assert set(data) == {"schema_version", "findings", "summary"}
