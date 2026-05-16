@@ -66,8 +66,8 @@ class SSHCollector(BaseCollector):
         config.password_authentication = _normalize_scalar(
             config_dict.get("passwordauthentication", "unknown")
         )
-        config.permit_empty_passwords = config_dict.get(
-            "permitemptypasswords", "unknown"
+        config.permit_empty_passwords = _normalize_scalar(
+            config_dict.get("permitemptypasswords", "unknown")
         )
         self._parse_port_and_address(config, config_dict)
         self._parse_crypto_settings(config, config_dict)
