@@ -5,6 +5,7 @@ from argus.fingerprints import (
     normalize_fingerprint_evidence,
     normalize_fingerprint_value,
 )
+from argus.models import Finding
 
 
 def test_fingerprint_value_normalization() -> None:
@@ -62,3 +63,17 @@ def test_generated_fingerprint_changes_for_different_resources() -> None:
     )
 
     assert first != second
+
+
+def test_finding_model_auto_populates_fingerprint() -> None:
+    """Findings should receive fingerprints without analyzer-specific code."""
+    finding = Finding(
+        id="ARGUS-SSH-002",
+        title="SSH password authentication is enabled",
+        severity="medium",
+        category="ssh",
+        description="Password authentication is enabled.",
+        evidence=["PasswordAuthentication yes"],
+    )
+
+    assert finding.fingerprint.startswith("v1:")
