@@ -450,6 +450,11 @@ def compare_reports(
                       help="Current ARGUS JSON report.")],
 ) -> None:
     """Compare two ARGUS JSON reports and show finding drift."""
+    import json
+    from pathlib import Path
+
+    from pydantic import ValidationError
+
     from argus.drift import compare_report_files
     from argus.output import render_drift_section, render_drift_summary
 
@@ -457,7 +462,11 @@ def compare_reports(
         console.print("[bold red]Error:[/bold red] --baseline and --current are required.")
         raise typer.Exit(code=1)
 
-    result = compare_report_files(baseline, current)
+    try:
+        result = compare_report_files(baseline, current)
+    except (FileNotFoundError, json.JSONDecodeError, ValidationError, ValueError) as exc:
+        console.print(f"[bold red]Error:[/bold red] Invalid report input: {exc}")
+        raise typer.Exit(code=1) from exc
     render_drift_summary(result.summary())
     render_drift_section("New Findings", result.new)
     render_drift_section("Resolved Findings", result.resolved)
