@@ -10,8 +10,9 @@ def normalize_fingerprint_value(value: str) -> str:
 
 def normalize_fingerprint_evidence(evidence: list[str]) -> list[str]:
     """Normalize evidence while dropping empty values."""
-    return [
+    normalized = [
         normalized
         for item in evidence
         if (normalized := normalize_fingerprint_value(item))
     ]
+    return sorted(dict.fromkeys(normalized))
