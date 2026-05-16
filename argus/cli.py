@@ -442,6 +442,24 @@ def report(
         render_recommendations(findings)
 
 
+@app.command("compare-reports")
+def compare_reports(
+    baseline: Annotated[str, typer.Option("--baseline", "-b",
+                         help="Baseline ARGUS JSON report.")],
+    current: Annotated[str, typer.Option("--current", "-c",
+                      help="Current ARGUS JSON report.")],
+) -> None:
+    """Compare two ARGUS JSON reports and show finding drift."""
+    from argus.drift import compare_report_files
+    from argus.output import render_drift_section, render_drift_summary
+
+    result = compare_report_files(baseline, current)
+    render_drift_summary(result.summary())
+    render_drift_section("New Findings", result.new)
+    render_drift_section("Resolved Findings", result.resolved)
+    render_drift_section("Unchanged Findings", result.unchanged)
+
+
 @config_app.command("init")
 def config_init() -> None:
     """Initialize default ARGUS configuration file."""
