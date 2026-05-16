@@ -41,3 +41,23 @@ def test_html_report_includes_summary_and_finding_details(tmp_path: Path) -> Non
     assert "Test finding" in html
     assert "example evidence" in html
     assert "Fix the test issue." in html
+
+
+def test_html_report_escapes_finding_content(tmp_path: Path) -> None:
+    """Finding content should be escaped before writing HTML."""
+    output_path = tmp_path / "report.html"
+    finding = Finding(
+        id="ARGUS-TEST-002",
+        title="<script>alert(1)</script>",
+        severity="medium",
+        category="test",
+        description="Unsafe <b>markup</b>",
+        evidence=["/tmp/<payload>"],
+    )
+
+    write_html_output([finding], str(output_path))
+
+    html = output_path.read_text()
+    assert "<script>alert(1)</script>" not in html
+    assert "&lt;script&gt;alert(1)&lt;/script&gt;" in html
+    assert "Unsafe &lt;b&gt;markup&lt;/b&gt;" in html
