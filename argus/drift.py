@@ -58,3 +58,11 @@ def load_findings_report(path: str | Path) -> list[Finding]:
     if not isinstance(findings_data, list):
         raise ValueError("expected a JSON object with a findings list")
     return [Finding(**finding) for finding in findings_data]
+
+
+def compare_report_files(baseline_path: str | Path, current_path: str | Path) -> DriftResult:
+    """Compare two ARGUS JSON report files."""
+    return compare_findings(
+        baseline_findings=load_findings_report(baseline_path),
+        current_findings=load_findings_report(current_path),
+    )
