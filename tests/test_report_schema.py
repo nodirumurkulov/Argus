@@ -78,6 +78,7 @@ def test_json_output_keeps_required_finding_fields(tmp_path) -> None:
         "category",
         "description",
         "evidence",
+        "fingerprint",
         "recommendation",
         "mitre",
         "references",
