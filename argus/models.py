@@ -6,6 +6,9 @@ from enum import Enum
 from pydantic import BaseModel, Field
 
 
+REPORT_SCHEMA_VERSION = "1.0"
+
+
 class SeverityLevel(str, Enum):
     """Severity levels for security findings."""
 
@@ -138,6 +141,7 @@ class HostData(BaseModel):
 class Report(BaseModel):
     """A complete ARGUS security report."""
 
+    schema_version: str = REPORT_SCHEMA_VERSION
     title: str = "ARGUS Security Report"
     generated_at: datetime = Field(default_factory=datetime.now)
     hostname: str = ""
