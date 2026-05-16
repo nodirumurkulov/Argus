@@ -52,7 +52,9 @@ class SSHCollector(BaseCollector):
         raw = self.safe_read_file(SSHD_CONFIG_PATH)
         if raw is None:
             return SSHConfig()
-        return self._parse_config(raw)
+        config = self._parse_config(raw)
+        config.source = SSHD_CONFIG_PATH
+        return config
 
     def _collect_effective_config(self) -> SSHConfig | None:
         """Collect effective sshd configuration with sshd -T when available."""
