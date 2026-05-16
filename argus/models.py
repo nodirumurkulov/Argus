@@ -5,6 +5,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field
 
+from argus.fingerprints import generate_finding_fingerprint
+
 
 REPORT_SCHEMA_VERSION = "1.0"
 
@@ -28,6 +30,7 @@ class Finding(BaseModel):
     category: str = Field(description="Finding category, e.g. ssh, users, network")
     description: str = Field(description="Detailed description of the finding")
     evidence: list[str] = Field(default_factory=list, description="Evidence strings")
+    fingerprint: str = Field(default="", description="Stable finding fingerprint")
     recommendation: str = Field(default="", description="Remediation recommendation")
     mitre: list[str] = Field(default_factory=list, description="MITRE ATT&CK technique IDs")
     references: list[str] = Field(default_factory=list, description="External reference URLs")
