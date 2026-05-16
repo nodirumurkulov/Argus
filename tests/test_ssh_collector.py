@@ -1,6 +1,7 @@
 """SSH collector parsing tests."""
 
 from argus.collectors.ssh import SSHCollector
+from argus.collectors import ssh as ssh_module
 
 
 class FakeSSHCollector(SSHCollector):
@@ -60,3 +61,17 @@ def test_ssh_collector_prefers_effective_sshd_output() -> None:
 
     assert config.source == "sshd -T"
     assert config.password_authentication == "no"
+
+
+def test_ssh_collector_falls_back_to_config_file(monkeypatch) -> None:
+    """Collector should parse sshd_config when sshd -T is unavailable."""
+    monkeypatch.setattr(ssh_module, "SSHD_CONFIG_PATH", "/tmp/sshd_config")
+    collector = FakeSSHCollector(
+        {("sshd", "-T"): None},
+        {"/tmp/sshd_config": "PasswordAuthentication yes\n"},
+    )
+
+    config = collector.collect()
+
+    assert config.source == "/tmp/sshd_config"
+    assert config.password_authentication == "yes"
