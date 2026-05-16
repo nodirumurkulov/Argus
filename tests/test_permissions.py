@@ -155,6 +155,23 @@ def test_sudo_collector_reports_writable_main_sudoers_file(
     assert writable == [str(sudoers_file)]
 
 
+def test_sudo_collector_reports_writable_include_directory(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """A writable sudoers include directory should be reported as unsafe."""
+    sudoers_file = _write_file(tmp_path / "sudoers", 0o440)
+    sudoers_dir = tmp_path / "sudoers.d"
+    sudoers_dir.mkdir()
+    sudoers_dir.chmod(0o775)
+    monkeypatch.setattr(sudo_module, "SUDOERS_FILE", str(sudoers_file))
+    monkeypatch.setattr(sudo_module, "SUDOERS_DIR", str(sudoers_dir))
+
+    writable = SudoCollector().get_writable_sudoers_files()
+
+    assert writable == [str(sudoers_dir)]
+
+
 def test_persistence_collector_uses_mode_bits_for_writable_files(
     tmp_path: Path,
     monkeypatch,
