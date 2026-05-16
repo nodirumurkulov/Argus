@@ -73,6 +73,17 @@ def test_permission_helper_treats_missing_paths_as_safe(tmp_path: Path) -> None:
     assert not is_group_or_world_writable(missing_path)
 
 
+def test_permission_helper_detects_world_writable_directory(tmp_path: Path) -> None:
+    """Directory mode bits should be checked the same way as files."""
+    directory = tmp_path / "profile.d"
+    directory.mkdir()
+    directory.chmod(0o777)
+
+    assert is_group_or_world_writable(directory)
+    assert is_group_writable(directory)
+    assert is_world_writable(directory)
+
+
 def test_cron_analyzer_ignores_owner_writable_script(tmp_path: Path) -> None:
     """Cron analyzer should not flag scripts that are only owner-writable."""
     script = _write_file(tmp_path / "job.sh", 0o700)
