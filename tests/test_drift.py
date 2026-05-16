@@ -37,3 +37,14 @@ def test_drift_result_reports_change_status() -> None:
 
     assert same_result.has_changes is False
     assert changed_result.has_changes is True
+
+
+def test_drift_result_summary_counts() -> None:
+    """Drift summaries should expose new, resolved, and unchanged counts."""
+    unchanged = _finding("ARGUS-TEST-001", "resource:a")
+    resolved = _finding("ARGUS-TEST-002", "resource:b")
+    new = _finding("ARGUS-TEST-003", "resource:c")
+
+    result = compare_findings([unchanged, resolved], [unchanged, new])
+
+    assert result.summary() == {"new": 1, "resolved": 1, "unchanged": 1}
