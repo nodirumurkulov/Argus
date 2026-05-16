@@ -97,6 +97,19 @@ def render_drift_summary(summary: dict[str, int]) -> None:
     console.print(f"  [dim]Unchanged:[/dim] {summary['unchanged']}")
 
 
+def render_drift_section(title: str, findings: list[Finding]) -> None:
+    """Render one drift finding section."""
+    console.print(f"\n[bold]{title}[/bold]")
+    if not findings:
+        console.print("  [dim]None[/dim]")
+        return
+    for finding in findings:
+        console.print(
+            f"  [{SEVERITY_COLORS.get(finding.severity, 'white')}]"
+            f"{finding.severity.value.upper()}[/] {finding.id} {finding.title}"
+        )
+
+
 def render_recommendations(findings: list[Finding]) -> None:
     """Render prioritized remediation recommendations."""
     actionable = [
