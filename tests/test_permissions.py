@@ -173,3 +173,21 @@ def test_persistence_collector_reports_writable_directories(
     PersistenceCollector()._check_persistence_files(findings)
 
     assert findings == [f"writable:{unsafe_dir}"]
+
+
+def test_persistence_collector_uses_mode_bits_for_startup_scripts(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """Startup script discovery should depend on executable mode bits."""
+    startup_dir = tmp_path / "init.d"
+    startup_dir.mkdir()
+    executable = _write_file(startup_dir / "boot", 0o755)
+    non_executable = _write_file(startup_dir / "note.sh", 0o644)
+    monkeypatch.setattr(persistence_module, "STARTUP_SCRIPT_DIRS", [str(startup_dir)])
+
+    findings: list[str] = []
+    PersistenceCollector()._scan_startup_directories(findings)
+
+    assert f"startup_script:{executable}" in findings
+    assert f"startup_script:{non_executable}" not in findings
