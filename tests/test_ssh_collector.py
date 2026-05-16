@@ -42,3 +42,13 @@ def test_ssh_parser_normalizes_algorithm_lists() -> None:
 
     assert config.ciphers == ["aes128-cbc", "chacha20-poly1305@openssh.com"]
     assert config.kex_algorithms == ["diffie-hellman-group1-sha1", "curve25519-sha256"]
+
+
+def test_ssh_collector_prefers_effective_sshd_output() -> None:
+    """Collector should prefer sshd -T output when it is available."""
+    collector = FakeSSHCollector({("sshd", "-T"): "passwordauthentication no\n"})
+
+    config = collector.collect()
+
+    assert config.source == "sshd -T"
+    assert config.password_authentication == "no"
