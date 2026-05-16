@@ -13,6 +13,11 @@ def _normalize_key(key: str) -> str:
     return key.strip().lower()
 
 
+def _strip_inline_comment(line: str) -> str:
+    """Remove unquoted sshd_config comments from a line."""
+    return line.split("#", 1)[0].strip()
+
+
 class SSHCollector(BaseCollector):
     """Collect and parse SSH server configuration."""
 
