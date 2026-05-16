@@ -34,6 +34,11 @@ def _normalize_scalar(value: str) -> str:
     return value.strip().strip('"\'').lower()
 
 
+def _split_csv(value: str) -> list[str]:
+    """Split comma-delimited sshd algorithm lists."""
+    return [item.strip().lower() for item in value.split(",") if item.strip()]
+
+
 class SSHCollector(BaseCollector):
     """Collect and parse SSH server configuration."""
 
