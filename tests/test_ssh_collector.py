@@ -105,7 +105,10 @@ def test_ssh_fallback_parser_reads_include_files(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(ssh_module, "SSHD_CONFIG_PATH", "/tmp/sshd_config")
     collector = FakeSSHCollector(
         {("sshd", "-T"): None},
-        {"/tmp/sshd_config": f"Include {include_file}\n"},
+        {
+            "/tmp/sshd_config": f"Include {include_file}\n",
+            str(include_file): "PermitRootLogin no\n",
+        },
     )
 
     config = collector.collect()
