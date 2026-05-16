@@ -174,6 +174,30 @@ def _html_summary_cards(findings: list[Finding]) -> str:
     return "".join(cards)
 
 
+HTML_REPORT_CSS = """
+:root { color-scheme: dark; }
+body { margin: 0; background: #020617; color: #e2e8f0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+main { max-width: 1120px; margin: 0 auto; padding: 48px 24px; }
+header { margin-bottom: 32px; }
+.eyebrow { color: #38bdf8; font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
+h1 { margin: 8px 0; font-size: clamp(36px, 6vw, 72px); line-height: .95; }
+h2 { margin-top: 36px; }
+.muted { color: #94a3b8; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 24px 0; }
+.metric { border: 1px solid #1e293b; border-top: 3px solid var(--severity-color, #38bdf8); border-radius: 16px; padding: 16px; background: #0f172a; }
+.metric span { display: block; font-size: 32px; font-weight: 800; }
+.finding { border: 1px solid #1e293b; border-left: 4px solid var(--severity-color); border-radius: 18px; padding: 22px; margin: 18px 0; background: #0f172a; }
+.finding-header { display: flex; gap: 10px; flex-wrap: wrap; }
+.severity, .category { border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700; background: #1e293b; }
+.severity { color: var(--severity-color); }
+dl { display: grid; grid-template-columns: 140px 1fr; gap: 8px 16px; }
+dt { color: #94a3b8; }
+dd { margin: 0; }
+code { color: #bae6fd; }
+ul { padding-left: 22px; }
+"""
+
+
 def render_recommendations(findings: list[Finding]) -> None:
     """Render prioritized remediation recommendations."""
     actionable = [
