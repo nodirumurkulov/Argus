@@ -399,6 +399,8 @@ def report(
     Supports Markdown and JSON output formats.
     """
     import json
+    from pathlib import Path
+
     from pydantic import ValidationError
 
     from argus.output import (
@@ -449,7 +451,6 @@ def compare_reports(
 ) -> None:
     """Compare two ARGUS JSON reports and show finding drift."""
     import json
-    from pathlib import Path
 
     from pydantic import ValidationError
 
