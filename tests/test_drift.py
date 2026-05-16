@@ -63,3 +63,20 @@ def test_load_findings_report_reads_argus_json(tmp_path) -> None:
     loaded = load_findings_report(report_path)
 
     assert loaded == [finding]
+
+
+def test_compare_report_files_uses_loaded_fingerprints(tmp_path) -> None:
+    """File comparison should produce the same drift groups as in-memory comparison."""
+    from argus.drift import compare_report_files
+
+    old_finding = _finding("ARGUS-TEST-001", "resource:a")
+    new_finding = _finding("ARGUS-TEST-002", "resource:b")
+    baseline_path = tmp_path / "baseline.json"
+    current_path = tmp_path / "current.json"
+    baseline_path.write_text(json.dumps({"findings": [old_finding.model_dump()]}))
+    current_path.write_text(json.dumps({"findings": [new_finding.model_dump()]}))
+
+    result = compare_report_files(baseline_path, current_path)
+
+    assert result.resolved == [old_finding]
+    assert result.new == [new_finding]
