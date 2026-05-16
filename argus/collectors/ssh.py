@@ -46,10 +46,20 @@ class SSHCollector(BaseCollector):
 
     def collect(self) -> SSHConfig:
         """Read and parse sshd_config into an SSHConfig model."""
+        effective = self._collect_effective_config()
+        if effective is not None:
+            return effective
         raw = self.safe_read_file(SSHD_CONFIG_PATH)
         if raw is None:
             return SSHConfig()
         return self._parse_config(raw)
+
+    def _collect_effective_config(self) -> SSHConfig | None:
+        """Collect effective sshd configuration with sshd -T when available."""
+        output = self.safe_run_command(["sshd", "-T"])
+        if not output:
+            return None
+        return self._parse_effective_config(output)
 
     def _parse_config(self, raw: str) -> SSHConfig:
         """Parse raw sshd_config content into structured data."""
