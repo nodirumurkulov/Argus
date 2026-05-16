@@ -75,3 +75,13 @@ def test_ssh_collector_falls_back_to_config_file(monkeypatch) -> None:
 
     assert config.source == "/tmp/sshd_config"
     assert config.password_authentication == "yes"
+
+
+def test_ssh_fallback_parser_preserves_first_repeated_directive() -> None:
+    """Fallback parsing should keep the first global directive value."""
+    config = SSHCollector()._parse_config(
+        "PasswordAuthentication no\n"
+        "PasswordAuthentication yes\n"
+    )
+
+    assert config.password_authentication == "no"
