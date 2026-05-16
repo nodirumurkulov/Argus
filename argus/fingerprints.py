@@ -43,3 +43,21 @@ def build_fingerprint_material(
 def hash_fingerprint_material(material: str) -> str:
     """Hash fingerprint material into a compact stable identifier."""
     return hashlib.sha256(material.encode("utf-8")).hexdigest()[:32]
+
+
+def generate_finding_fingerprint(
+    finding_id: str,
+    category: str,
+    title: str,
+    severity: str,
+    evidence: list[str],
+) -> str:
+    """Generate a stable fingerprint for a finding."""
+    material = build_fingerprint_material(
+        finding_id=finding_id,
+        category=category,
+        title=title,
+        severity=severity,
+        evidence=evidence,
+    )
+    return f"{FINDING_FINGERPRINT_VERSION}:{hash_fingerprint_material(material)}"
