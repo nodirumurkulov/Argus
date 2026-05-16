@@ -65,6 +65,14 @@ def test_permission_helper_distinguishes_group_and_world_bits(
     assert is_world_writable(world_path)
 
 
+def test_permission_helper_treats_missing_paths_as_safe(tmp_path: Path) -> None:
+    """Missing paths should not produce unsafe writable false positives."""
+    missing_path = tmp_path / "missing.conf"
+
+    assert unsafe_writable_bits(missing_path) == 0
+    assert not is_group_or_world_writable(missing_path)
+
+
 def test_cron_analyzer_ignores_owner_writable_script(tmp_path: Path) -> None:
     """Cron analyzer should not flag scripts that are only owner-writable."""
     script = _write_file(tmp_path / "job.sh", 0o700)
