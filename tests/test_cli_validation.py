@@ -2,7 +2,7 @@
 
 from typer.testing import CliRunner
 
-from argus.cli import app
+from argus.cli import app, validate_output_format
 
 runner = CliRunner()
 
@@ -32,6 +32,11 @@ def test_analyze_logs_rejects_invalid_output_format() -> None:
 
     assert result.exit_code != 0
     assert "must be one of" in result.output
+
+
+def test_validate_output_format_accepts_html() -> None:
+    """Output format validation should accept HTML reports."""
+    assert validate_output_format("HTML") == "html"
 
 
 def test_scan_host_rejects_invalid_severity() -> None:

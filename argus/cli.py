@@ -17,7 +17,7 @@ app = typer.Typer(
 
 console = Console()
 
-VALID_OUTPUT_FORMATS = {"markdown", "json"}
+VALID_OUTPUT_FORMATS = {"html", "markdown", "json"}
 
 
 def validate_output_format(value: str) -> str:
@@ -76,14 +76,14 @@ BANNER = """
     \033[90m┌─ COMMAND CENTER ───────────────────────────────────────────────┐\033[0m
       \033[32m[1]\033[0m  scan-host      Audit SSH, users, sudo, ports, firewall
       \033[32m[2]\033[0m  analyze-logs   Detect brute-force, spraying, root logins
-      \033[32m[3]\033[0m  report         Export findings as Markdown or JSON
+      \033[32m[3]\033[0m  report         Export findings as Markdown, HTML, or JSON
       \033[32m[4]\033[0m  config         Manage local ARGUS settings
     \033[90m└─────────────────────────────────────────────────────────────────┘\033[0m
 
     \033[90mExamples\033[0m
       \033[36margus scan-host --severity high\033[0m
       \033[36margus analyze-logs /var/log/auth.log --severity medium\033[0m
-      \033[36margus report --input findings.json --output report.md\033[0m
+      \033[36margus report --input findings.json --format html --output report.html\033[0m
 
     \033[31margus>\033[0m ready to defend.
 """
@@ -147,6 +147,7 @@ def scan_host(
         render_host_info,
         render_recommendations,
         render_summary_panel,
+        write_html_output,
         write_json_output,
         write_markdown_output,
     )
@@ -186,6 +187,8 @@ def scan_host(
     if output:
         if format == "json":
             write_json_output(findings, output)
+        elif format == "html":
+            write_html_output(findings, output, hostname=host_data.hostname)
         else:
             write_markdown_output(findings, output, hostname=host_data.hostname)
 
@@ -223,6 +226,7 @@ def analyze_logs(
         render_findings_table,
         render_recommendations,
         render_summary_panel,
+        write_html_output,
         write_json_output,
         write_markdown_output,
     )
@@ -281,6 +285,8 @@ def analyze_logs(
     if output:
         if format == "json":
             write_json_output(findings, output)
+        elif format == "html":
+            write_html_output(findings, output)
         else:
             write_markdown_output(findings, output)
 
@@ -407,6 +413,7 @@ def report(
         render_findings_table,
         render_recommendations,
         render_summary_panel,
+        write_html_output,
         write_json_output,
         write_markdown_output,
     )
@@ -435,6 +442,8 @@ def report(
     if output:
         if format == "json":
             write_json_output(findings, output)
+        elif format == "html":
+            write_html_output(findings, output)
         else:
             write_markdown_output(findings, output)
     else:

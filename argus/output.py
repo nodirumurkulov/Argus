@@ -1,6 +1,7 @@
 """Rich terminal output rendering for ARGUS findings."""
 
 import json
+from html import escape
 from pathlib import Path
 
 from rich.console import Console
@@ -20,11 +21,27 @@ SEVERITY_COLORS = {
     SeverityLevel.INFO: "dim",
 }
 
+HTML_SEVERITY_COLORS = {
+    SeverityLevel.CRITICAL: "#ef4444",
+    SeverityLevel.HIGH: "#f97316",
+    SeverityLevel.MEDIUM: "#eab308",
+    SeverityLevel.LOW: "#38bdf8",
+    SeverityLevel.INFO: "#94a3b8",
+}
+
 
 def severity_badge(severity: SeverityLevel) -> Text:
     """Create a colored severity badge."""
     color = SEVERITY_COLORS.get(severity, "white")
     return Text(severity.value.upper(), style=color)
+
+
+def severity_counts(findings: list[Finding]) -> dict[SeverityLevel, int]:
+    """Count findings by severity."""
+    return {
+        severity: sum(1 for finding in findings if finding.severity == severity)
+        for severity in SeverityLevel
+    }
 
 
 def render_findings_table(findings: list[Finding]) -> None:
@@ -108,6 +125,77 @@ def render_drift_section(title: str, findings: list[Finding]) -> None:
             f"  [{SEVERITY_COLORS.get(finding.severity, 'white')}]"
             f"{finding.severity.value.upper()}[/] {finding.id} {finding.title}"
         )
+
+
+def _html_list(items: list[str]) -> str:
+    """Render a list of strings as escaped HTML list items."""
+    if not items:
+        return "<p class=\"muted\">None</p>"
+    rendered = "".join(f"<li><code>{escape(item)}</code></li>" for item in items)
+    return f"<ul>{rendered}</ul>"
+
+
+def _html_finding_card(finding: Finding) -> str:
+    """Render one finding as an HTML card."""
+    color = HTML_SEVERITY_COLORS.get(finding.severity, "#e2e8f0")
+    mitre = ", ".join(escape(item) for item in finding.mitre) or "None"
+    recommendation = escape(finding.recommendation) or "No recommendation provided."
+    return f"""
+    <article class="finding" style="--severity-color: {color}">
+      <div class="finding-header">
+        <span class="severity">{escape(finding.severity.value.upper())}</span>
+        <span class="category">{escape(finding.category)}</span>
+      </div>
+      <h3>{escape(finding.title)}</h3>
+      <p>{escape(finding.description)}</p>
+      <dl>
+        <dt>ID</dt><dd><code>{escape(finding.id)}</code></dd>
+        <dt>Fingerprint</dt><dd><code>{escape(finding.fingerprint)}</code></dd>
+        <dt>MITRE ATT&CK</dt><dd>{mitre}</dd>
+      </dl>
+      <h4>Evidence</h4>
+      {_html_list(finding.evidence)}
+      <h4>Recommendation</h4>
+      <p>{recommendation}</p>
+    </article>
+    """
+
+
+def _html_summary_cards(findings: list[Finding]) -> str:
+    """Render severity count cards for an HTML report."""
+    counts = severity_counts(findings)
+    cards = [f"<div class=\"metric total\"><span>{len(findings)}</span><strong>Total</strong></div>"]
+    for severity in SeverityLevel:
+        cards.append(
+            "<div class=\"metric\" style=\"--severity-color: "
+            f"{HTML_SEVERITY_COLORS[severity]}\"><span>{counts[severity]}</span>"
+            f"<strong>{escape(severity.value.title())}</strong></div>"
+        )
+    return "".join(cards)
+
+
+HTML_REPORT_CSS = """
+:root { color-scheme: dark; }
+body { margin: 0; background: #020617; color: #e2e8f0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+main { max-width: 1120px; margin: 0 auto; padding: 48px 24px; }
+header { margin-bottom: 32px; }
+.eyebrow { color: #38bdf8; font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
+h1 { margin: 8px 0; font-size: clamp(36px, 6vw, 72px); line-height: .95; }
+h2 { margin-top: 36px; }
+.muted { color: #94a3b8; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 24px 0; }
+.metric { border: 1px solid #1e293b; border-top: 3px solid var(--severity-color, #38bdf8); border-radius: 16px; padding: 16px; background: #0f172a; }
+.metric span { display: block; font-size: 32px; font-weight: 800; }
+.finding { border: 1px solid #1e293b; border-left: 4px solid var(--severity-color); border-radius: 18px; padding: 22px; margin: 18px 0; background: #0f172a; }
+.finding-header { display: flex; gap: 10px; flex-wrap: wrap; }
+.severity, .category { border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700; background: #1e293b; }
+.severity { color: var(--severity-color); }
+dl { display: grid; grid-template-columns: 140px 1fr; gap: 8px 16px; }
+dt { color: #94a3b8; }
+dd { margin: 0; }
+code { color: #bae6fd; }
+ul { padding-left: 22px; }
+"""
 
 
 def render_recommendations(findings: list[Finding]) -> None:
@@ -276,3 +364,48 @@ def write_markdown_output(
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines))
     console.print(f"\n[green]Report written to:[/green] {output_path}")
+
+
+def write_html_output(
+    findings: list[Finding],
+    output_path: str,
+    hostname: str = "",
+) -> None:
+    """Write findings to a self-contained HTML report."""
+    sorted_findings = sorted(
+        findings,
+        key=lambda f: list(SeverityLevel).index(f.severity),
+    )
+    finding_cards = "\n".join(_html_finding_card(finding) for finding in sorted_findings)
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ARGUS Security Report</title>
+  <style>{HTML_REPORT_CSS}</style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">ARGUS Security Report</div>
+      <h1>Security Posture Summary</h1>
+      <p class="muted">Host: {escape(hostname) if hostname else 'Unknown'}</p>
+    </header>
+    <section class="metrics">{_html_summary_cards(findings)}</section>
+    <section>
+      <h2>Executive Summary</h2>
+      <p>ARGUS identified {len(findings)} finding(s). Review high-impact findings first and use the recommendations below to prioritize remediation.</p>
+    </section>
+    <section>
+      <h2>Findings</h2>
+      {finding_cards or '<p class="muted">No security findings detected.</p>'}
+    </section>
+  </main>
+</body>
+</html>
+"""
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(html)
+    console.print(f"\n[green]HTML report written to:[/green] {output_path}")
