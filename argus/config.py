@@ -5,7 +5,6 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, Field
 
-
 DEFAULT_CONFIG_DIR = Path.home() / ".config" / "argus"
 DEFAULT_CONFIG_PATH = DEFAULT_CONFIG_DIR / "config.yaml"
 

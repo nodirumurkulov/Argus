@@ -7,7 +7,6 @@ from pydantic import BaseModel, Field
 
 from argus.fingerprints import generate_finding_fingerprint
 
-
 REPORT_SCHEMA_VERSION = "1.0"
 
 
@@ -36,7 +35,7 @@ class Finding(BaseModel):
     references: list[str] = Field(default_factory=list, description="External reference URLs")
     llm_summary: str | None = Field(default=None, description="LLM-generated summary")
 
-    def model_post_init(self, __context: object) -> None:
+    def model_post_init(self, context: object, /) -> None:
         """Populate a stable fingerprint when callers do not provide one."""
         if self.fingerprint:
             return

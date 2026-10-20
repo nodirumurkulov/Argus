@@ -1,7 +1,7 @@
 """SSH configuration collector for ARGUS."""
 
-from pathlib import Path
 from glob import glob
+from pathlib import Path
 
 from argus.collectors.base import BaseCollector
 from argus.models import SSHConfig

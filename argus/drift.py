@@ -56,7 +56,8 @@ def load_findings_report(path: str | Path) -> list[Finding]:
     data = json.loads(Path(path).read_text())
     findings_data = data.get("findings") if isinstance(data, dict) else None
     if not isinstance(findings_data, list):
-        raise ValueError("expected a JSON object with a findings list")
+        # Preserve ValueError for invalid report contents and the CLI's error handling.
+        raise ValueError("expected a JSON object with a findings list")  # noqa: TRY004
     return [Finding(**finding) for finding in findings_data]
 
 

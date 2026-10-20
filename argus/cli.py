@@ -424,7 +424,8 @@ def report(
         data = json.loads(input_path.read_text())
         findings_data = data.get("findings") if isinstance(data, dict) else None
         if not isinstance(findings_data, list):
-            raise ValueError("expected a JSON object with a findings list")
+            # Invalid report contents are a value error, not a caller argument type error.
+            raise ValueError("expected a JSON object with a findings list")  # noqa: TRY004
         findings = [Finding(**finding) for finding in findings_data]
     except (json.JSONDecodeError, ValidationError, ValueError) as exc:
         console.print(f"[bold red]Error:[/bold red] Invalid findings JSON: {exc}")

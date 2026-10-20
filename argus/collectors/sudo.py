@@ -5,7 +5,6 @@ from pathlib import Path
 from argus.collectors.base import BaseCollector
 from argus.permissions import is_group_or_world_writable
 
-
 SUDOERS_FILE = "/etc/sudoers"
 SUDOERS_DIR = "/etc/sudoers.d"
 
@@ -32,7 +31,7 @@ class SudoCollector(BaseCollector):
             return
         for line in raw.splitlines():
             line = line.strip()
-            if not line or line.startswith("#") or line.startswith("Defaults"):
+            if not line or line.startswith(("#", "Defaults")):
                 continue
             if "\tALL=" in line or " ALL=" in line or "ALL=(" in line:
                 parts = line.split(None, 1)

@@ -90,7 +90,7 @@ class UserCollector(BaseCollector):
             if pwd_field == "":
                 user.password_empty = True
                 user.has_password = False
-            elif pwd_field.startswith("!") or pwd_field.startswith("*"):
+            elif pwd_field.startswith(("!", "*")):
                 user.has_password = False
             else:
                 user.has_password = True
@@ -105,7 +105,7 @@ class UserCollector(BaseCollector):
         logins: list[dict[str, str]] = []
         for line in output.splitlines():
             line = line.strip()
-            if not line or line.startswith("wtmp") or line.startswith("reboot"):
+            if not line or line.startswith(("wtmp", "reboot")):
                 continue
             parts = line.split()
             if len(parts) >= 3:

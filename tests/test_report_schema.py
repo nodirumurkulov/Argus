@@ -2,7 +2,7 @@
 
 import json
 
-from argus.models import Finding, REPORT_SCHEMA_VERSION, Report
+from argus.models import REPORT_SCHEMA_VERSION, Finding, Report
 from argus.output import write_json_output
 
 

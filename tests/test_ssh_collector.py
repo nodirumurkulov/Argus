@@ -1,7 +1,7 @@
 """SSH collector parsing tests."""
 
-from argus.collectors.ssh import SSHCollector
 from argus.collectors import ssh as ssh_module
+from argus.collectors.ssh import SSHCollector
 
 
 class FakeSSHCollector(SSHCollector):

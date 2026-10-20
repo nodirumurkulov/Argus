@@ -44,7 +44,7 @@ def run_all_analyzers(host_data: HostData, verbose: bool = False) -> list[Findin
                 console.print(
                     f"  [dim]{name}:[/dim] {len(findings)} finding(s)"
                 )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - One failed analyzer must not stop the scan.
             if verbose:
                 console.print(f"  [yellow]Warning:[/yellow] {name}: {e}")
 

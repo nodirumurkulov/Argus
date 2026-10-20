@@ -40,6 +40,7 @@ class BaseCollector(ABC):
         try:
             result = subprocess.run(
                 command,
+                check=False,
                 capture_output=True,
                 text=True,
                 timeout=30,

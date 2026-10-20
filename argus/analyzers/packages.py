@@ -3,7 +3,6 @@
 from argus.analyzers.base import BaseAnalyzer
 from argus.models import Finding
 
-
 SECURITY_PACKAGES = {
     "fail2ban": "Brute-force protection",
     "ufw": "Firewall management",

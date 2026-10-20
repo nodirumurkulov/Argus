@@ -3,7 +3,6 @@
 from argus.analyzers.base import BaseAnalyzer
 from argus.models import Finding, NetworkConnection
 
-
 RISKY_PORTS = {
     21: "FTP",
     23: "Telnet",

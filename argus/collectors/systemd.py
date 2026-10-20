@@ -6,7 +6,6 @@ from argus.collectors.base import BaseCollector
 from argus.models import SystemdService
 from argus.permissions import is_group_or_world_writable
 
-
 SYSTEMD_PATHS = [
     "/etc/systemd/system",
     "/lib/systemd/system",

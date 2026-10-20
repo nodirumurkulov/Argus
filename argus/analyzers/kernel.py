@@ -3,7 +3,6 @@
 from argus.analyzers.base import BaseAnalyzer
 from argus.models import Finding
 
-
 SYSCTL_EXPECTATIONS = {
     "net.ipv4.ip_forward": {
         "expected": "0",

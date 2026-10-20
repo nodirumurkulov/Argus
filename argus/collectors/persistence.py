@@ -5,7 +5,6 @@ from pathlib import Path
 from argus.collectors.base import BaseCollector
 from argus.permissions import is_executable_by_mode, is_group_or_world_writable
 
-
 PERSISTENCE_PATHS = [
     "/etc/rc.local",
     "/etc/init.d",
@@ -55,9 +54,12 @@ class PersistenceCollector(BaseCollector):
                 continue
             try:
                 for entry in sorted(d.iterdir()):
-                    if entry.is_file() and entry.suffix in (".sh", ""):
-                        if is_executable_by_mode(entry):
-                            findings.append(f"startup_script:{entry}")
+                    if (
+                        entry.is_file()
+                        and entry.suffix in (".sh", "")
+                        and is_executable_by_mode(entry)
+                    ):
+                        findings.append(f"startup_script:{entry}")
             except PermissionError:
                 pass
 

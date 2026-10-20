@@ -1,7 +1,7 @@
 """Sigma rule generation tests."""
 
-import yaml
 import pytest
+import yaml
 
 from argus.detections import (
     UnknownSigmaScenario,

@@ -3,7 +3,6 @@
 from argus.analyzers.base import BaseAnalyzer
 from argus.models import Finding, UserInfo
 
-
 NOLOGIN_SHELLS = {"/usr/sbin/nologin", "/bin/false", "/sbin/nologin"}
 
 

@@ -8,7 +8,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from argus.models import Finding, REPORT_SCHEMA_VERSION, SeverityLevel
+from argus.models import REPORT_SCHEMA_VERSION, Finding, SeverityLevel
 
 console = Console()
 

@@ -6,7 +6,6 @@ from argus.analyzers.base import BaseAnalyzer
 from argus.models import CronEntry, Finding
 from argus.permissions import is_group_or_world_writable
 
-
 SUSPICIOUS_COMMANDS = [
     "curl ", "wget ", "nc ", "ncat ",
     "/dev/tcp/", "base64", "eval ",

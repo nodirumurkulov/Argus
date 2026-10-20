@@ -46,7 +46,7 @@ def collect_host_data(verbose: bool = False) -> HostData:
             progress.update(task, description=f"Collecting {description}...")
             try:
                 collector_fn(data)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - Keep collecting when one source fails.
                 if verbose:
                     console.print(f"[yellow]Warning:[/yellow] {description}: {e}")
             progress.advance(task)
