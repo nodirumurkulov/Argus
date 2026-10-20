@@ -1,6 +1,6 @@
 # ARGUS
 
-A command-line assistant for defensive security on Linux. Runs locally, with optional AI analysis.
+A command line assistant for defensive security on Linux. Runs locally, with optional AI analysis.
 
 <pre style="background: #0d1117; color: #8b949e; padding: 16px; border-radius: 6px; line-height: 1.3; overflow-x: auto;">
 
@@ -11,19 +11,18 @@ A command-line assistant for defensive security on Linux. Runs locally, with opt
     ██║  ██║ ██║  ██║ ╚██████╔╝╚██████╔╝██████╔╝
     ╚═╝  ╚═╝ ╚═╝  ╚═╝  ╚═════╝  ╚═════╝ ╚═════╝</span>
 
-    <span style="color: #8b949e;">ARGUS // Offline Blue-Team Security Assistant  |  Rules + Local AI  |  Linux
-    ─────────────────────────────────────────────────────────────────────</span>
+    <span style="color: #8b949e;">ARGUS // Offline Blue Team Security Assistant  |  Rules + Local AI  |  Linux
+    </span>
 
     <span style="color: #0066cc;">[*]</span> Purpose: collect evidence, find risks, and suggest fixes
-    <span style="color: #0066cc;">[+]</span> Mode: read-only local host analysis
+    <span style="color: #0066cc;">[+]</span> Mode: local host analysis without changing system settings
     <span style="color: #cc0000;">[!]</span> Defensive only: harden, triage, report
 
-    <span style="color: #8b949e;">┌─ COMMAND CENTER ───────────────────────────────────────────────┐</span>
+    <span style="color: #8b949e;">COMMAND CENTER</span>
       <span style="color: #0066cc;">[1]</span>  scan-host      Audit SSH, users, sudo, ports, firewall
-      <span style="color: #0066cc;">[2]</span>  analyze-logs   Detect brute-force, spraying, root logins
+      <span style="color: #0066cc;">[2]</span>  analyze-logs   Detect brute force, spraying, root logins
       <span style="color: #0066cc;">[3]</span>  report         Export findings as Markdown or JSON
       <span style="color: #0066cc;">[4]</span>  config         Manage local ARGUS settings
-    <span style="color: #8b949e;">└─────────────────────────────────────────────────────────────────┘</span>
 
     <span style="color: #8b949e;">Examples</span>
       <span style="color: #0066cc;">argus scan-host --severity high</span>
@@ -35,7 +34,7 @@ A command-line assistant for defensive security on Linux. Runs locally, with opt
 
 ## What is ARGUS?
 
-ARGUS is an open-source Python CLI for checking Linux hosts and investigating suspicious activity. It's built for system administrators, blue teams, SOC analysts, and people running homelabs.
+ARGUS is an open source Python CLI for checking Linux hosts and investigating suspicious activity. It's built for system administrators, blue teams, SOC analysts, and people running homelabs.
 
 Use it to review host configuration, analyze authentication logs, and write reports with findings and suggested fixes. It also supports defensive detection rules and maps findings to MITRE ATT&CK.
 
@@ -46,7 +45,7 @@ ARGUS focuses on host hardening, log analysis, incident response, and detection 
 | Feature | Command | Description |
 |---------|---------|-------------|
 | Host Security Scan | `argus scan-host` | Analyze SSH, users, sudo, ports, cron, systemd, firewall |
-| Log Analysis | `argus analyze-logs` | Detect brute-force, spraying, suspicious logins |
+| Log Analysis | `argus analyze-logs` | Detect brute force, spraying, suspicious logins |
 | Incident Investigation | `argus investigate` | Guided triage for common incident types |
 | Detection Rules | `argus generate-rule` | Generate Sigma, auditd, YARA, Suricata rules |
 | Report Generation | `argus report` | Markdown and JSON security reports |
@@ -54,7 +53,7 @@ ARGUS focuses on host hardening, log analysis, incident response, and detection 
 
 ### How it works
 
-ARGUS runs locally without cloud APIs, telemetry, or API keys. Rule-based checks work without a language model. You can optionally use a local model through [Ollama](https://ollama.ai/) for AI analysis.
+ARGUS runs locally without cloud APIs, telemetry, or API keys. Checks based on rules work without a language model. You can optionally use a local model through [Ollama](https://ollama.ai/) for AI analysis.
 
 Findings include MITRE ATT&CK mappings. The CLI displays results in Rich tables with colored output, and reports can be saved as Markdown or JSON.
 
@@ -65,16 +64,16 @@ Findings include MITRE ATT&CK mappings. The CLI displays results in Rich tables 
 | Debian / Ubuntu | Primary |
 | Kali Linux | Primary |
 | Parrot OS | Primary |
-| Other Debian-based | Supported |
+| Other Debian derivatives | Supported |
 | Fedora / Arch | Planned |
-| macOS (read-only) | Planned |
+| macOS (read only) | Planned |
 
 ## Installation
 
 ### Requirements
 
-- Python 3.11+
-- pip
+* Python 3.11+
+* pip
 
 ### Install from source
 
@@ -128,10 +127,10 @@ argus generate-rule --type sigma --scenario root-login --output root-login.yml
 
 The initial Sigma scenarios are:
 
-- `ssh-bruteforce`: repeated SSH password failures
-- `password-spraying`: failed SSH attempts against multiple usernames
-- `root-login`: direct successful SSH login as root
-- `successful-after-failures`: successful SSH login after repeated failures
+* `ssh-bruteforce`: repeated SSH password failures
+* `password-spraying`: failed SSH attempts against multiple usernames
+* `root-login`: direct successful SSH login as root
+* `successful-after-failures`: successful SSH login after repeated failures
 
 ### Generate a report
 
@@ -143,7 +142,7 @@ argus report --input findings.json --format json
 
 ## Ollama setup (optional)
 
-To use a local language model with ARGUS, install [Ollama](https://ollama.ai/) and configure it below. You can skip this setup if you only need rule-based analysis.
+To use a local language model with ARGUS, install [Ollama](https://ollama.ai/) and configure it below. You can skip this setup if you only need analysis based on rules.
 
 ### Install Ollama
 
@@ -179,45 +178,45 @@ llm:
 
 ### SSH
 
-- Root login enabled
-- Password authentication enabled
-- Empty password login
-- Weak ciphers configured
-- Listening on all interfaces
+* Root login enabled
+* Password authentication enabled
+* Empty password login
+* Weak ciphers configured
+* Listening on all interfaces
 
 ### Users
 
-- UID 0 users other than root
-- Empty password fields
-- Recently created users
-- Service accounts with login shells
+* UID 0 users other than root
+* Empty password fields
+* Recently created users
+* Service accounts with login shells
 
 ### Sudo
 
-- Passwordless sudo
-- Broad sudo access
-- Writable sudoers include files
+* Passwordless sudo
+* Broad sudo access
+* Writable sudoers include files
 
 ### Persistence
 
-- Suspicious cron entries
-- Unusual systemd services
-- Writable systemd unit files
-- Shell scripts in startup paths
+* Suspicious cron entries
+* Unusual systemd services
+* Writable systemd unit files
+* Shell scripts in startup paths
 
 ### Network
 
-- Unexpected listening services
-- Services bound to 0.0.0.0
-- Risky ports exposed
+* Unexpected listening services
+* Services bound to 0.0.0.0
+* Risky ports exposed
 
 ### Authentication logs
 
-- SSH brute-force attempts
-- Password spraying
-- Successful login after repeated failures
-- Sudo abuse
-- Suspicious root login
+* SSH brute force attempts
+* Password spraying
+* Successful login after repeated failures
+* Sudo abuse
+* Suspicious root login
 
 ## Severity levels
 
@@ -253,32 +252,32 @@ argus/
 
 ### MVP (current)
 
-- [x] Python package with CLI
-- [x] CLI with typer and Rich
-- [x] Data models and configuration
-- [x] Host security scanning
-- [x] Authentication log analysis
-- [x] Markdown and JSON reports
-- [x] CLI option validation
-- [x] GitHub Actions CI
-- [ ] Ollama LLM integration
-- [ ] Sigma rule generation
-- [ ] auditd rule generation
-- [x] MITRE ATT&CK mapping for core findings
-- [x] Initial unit tests
+* [x] Python package with CLI
+* [x] CLI with typer and Rich
+* [x] Data models and configuration
+* [x] Host security scanning
+* [x] Authentication log analysis
+* [x] Markdown and JSON reports
+* [x] CLI option validation
+* [x] GitHub Actions CI
+* [ ] Ollama LLM integration
+* [ ] Sigma rule generation
+* [ ] auditd rule generation
+* [x] MITRE ATT&CK mapping for core findings
+* [x] Initial unit tests
 
 ### Future
 
-- [ ] YARA rule generation
-- [ ] Suricata rule generation
-- [ ] TUI dashboard (textual)
-- [ ] Wazuh integration
-- [ ] OSQuery integration
-- [ ] Zeek log support
-- [ ] Docker image
-- [ ] Web dashboard
-- [ ] Multi-host collector
-- [ ] Baseline drift detection
+* [ ] YARA rule generation
+* [ ] Suricata rule generation
+* [ ] TUI dashboard (textual)
+* [ ] Wazuh integration
+* [ ] OSQuery integration
+* [ ] Zeek log support
+* [ ] Docker image
+* [ ] Web dashboard
+* [ ] Collector for multiple hosts
+* [ ] Baseline drift detection
 
 ## Contributing
 
@@ -301,33 +300,33 @@ pytest
 
 ### Code style
 
-- Python 3.11+
-- Type hints required
-- Ruff for linting
-- Conventional commits
+* Python 3.11+
+* Type hints required
+* Ruff for linting
+* Conventional commits
 
 ## Defensive use
 
 ARGUS is built for defensive security. It does not provide:
 
-- Exploit execution
-- Brute-force tooling
-- Credential attacks
-- Reverse shell generation
-- Payload generation
-- Vulnerability exploitation
-- Automatic privilege escalation
-- Persistence creation
+* Exploit execution
+* Brute force tooling
+* Credential attacks
+* Reverse shell generation
+* Payload generation
+* Vulnerability exploitation
+* Automatic privilege escalation
+* Persistence creation
 
 Its defensive features include:
 
-- Defensive detection rules
-- Hardening advice
-- Incident response steps
-- Forensic triage guidance
-- Log analysis
-- Local configuration review
-- Read-only security posture checks
+* Defensive detection rules
+* Hardening advice
+* Incident response steps
+* Forensic triage guidance
+* Log analysis
+* Local configuration review
+* Security posture checks that do not modify the system
 
 ## License
 
