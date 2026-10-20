@@ -1,8 +1,6 @@
 # ARGUS
 
-### Offline AI Defensive Security Assistant
-
-> **Local-first blue-team analysis for Linux.**
+A command-line assistant for defensive security on Linux. Runs locally, with optional AI analysis.
 
 <pre style="background: #0d1117; color: #8b949e; padding: 16px; border-radius: 6px; line-height: 1.3; overflow-x: auto;">
 
@@ -16,7 +14,7 @@
     <span style="color: #8b949e;">ARGUS // Offline Blue-Team Security Assistant  |  Rules + Local AI  |  Linux
     ─────────────────────────────────────────────────────────────────────</span>
 
-    <span style="color: #0066cc;">[*]</span> Mission: collect evidence, detect risk, and produce remediation
+    <span style="color: #0066cc;">[*]</span> Purpose: collect evidence, find risks, and suggest fixes
     <span style="color: #0066cc;">[+]</span> Mode: read-only local host analysis
     <span style="color: #cc0000;">[!]</span> Defensive only: harden, triage, report
 
@@ -35,27 +33,13 @@
     <span style="color: #cc0000;">argus></span> ready to defend.
 </pre>
 
-<p align="center">
-  <em>"See everything. Understand everything. Secure everything."</em>
-</p>
-
----
-
 ## What is ARGUS?
 
-**ARGUS** is an open-source, offline-first AI defensive security assistant for Linux systems. It is a Python-based CLI tool that helps **blue teams**, **SOC analysts**, **homelab users**, and **system administrators**:
+ARGUS is an open-source Python CLI for checking Linux hosts and investigating suspicious activity. It's built for system administrators, blue teams, SOC analysts, and people running homelabs.
 
-- Analyze local security posture
-- Investigate suspicious activity
-- Generate defensive detection rules
-- Produce clear remediation reports
-- Map findings to MITRE ATT&CK
+Use it to review host configuration, analyze authentication logs, and write reports with findings and suggested fixes. It also supports defensive detection rules and maps findings to MITRE ATT&CK.
 
-ARGUS is the **defensive counterpart** to offensive security tools. It focuses exclusively on defensive workflows: host hardening, log analysis, incident response, detection engineering, and risk prioritization.
-
-> **Defensive only.** ARGUS does not provide exploit automation, credential attacks, reverse shells, payload generation, or any offensive capabilities.
-
----
+ARGUS focuses on host hardening, log analysis, incident response, and detection engineering. It does not include tools for exploitation or credential attacks.
 
 ## Features
 
@@ -68,18 +52,13 @@ ARGUS is the **defensive counterpart** to offensive security tools. It focuses e
 | Report Generation | `argus report` | Markdown and JSON security reports |
 | Configuration | `argus config` | Manage ARGUS settings |
 
-### Key Capabilities
+### How it works
 
-- **Runs fully offline** — no cloud APIs, no telemetry, no API keys
-- **Local LLM support** via [Ollama](https://ollama.ai/) for AI-powered analysis
-- **Works without LLM** — rule-based findings are always available
-- **MITRE ATT&CK mapping** for all findings
-- **Beautiful CLI** with terminal-first dashboards, Rich tables, and colored output
-- **Multiple output formats** — Markdown and JSON reports
+ARGUS runs locally without cloud APIs, telemetry, or API keys. Rule-based checks work without a language model. You can optionally use a local model through [Ollama](https://ollama.ai/) for AI analysis.
 
----
+Findings include MITRE ATT&CK mappings. The CLI displays results in Rich tables with colored output, and reports can be saved as Markdown or JSON.
 
-## Supported Platforms
+## Supported platforms
 
 | Platform | Status |
 |----------|--------|
@@ -89,8 +68,6 @@ ARGUS is the **defensive counterpart** to offensive security tools. It focuses e
 | Other Debian-based | Supported |
 | Fedora / Arch | Planned |
 | macOS (read-only) | Planned |
-
----
 
 ## Installation
 
@@ -114,9 +91,7 @@ argus --version
 argus --help
 ```
 
----
-
-## Quick Start
+## Quick start
 
 ### Run a host security scan
 
@@ -151,12 +126,12 @@ argus generate-rule --type sigma --scenario password-spraying
 argus generate-rule --type sigma --scenario root-login --output root-login.yml
 ```
 
-Initial Sigma scenarios:
+The initial Sigma scenarios are:
 
-- `ssh-bruteforce` — repeated SSH password failures
-- `password-spraying` — failed SSH attempts against multiple usernames
-- `root-login` — direct successful SSH login as root
-- `successful-after-failures` — successful SSH login after repeated failures
+- `ssh-bruteforce`: repeated SSH password failures
+- `password-spraying`: failed SSH attempts against multiple usernames
+- `root-login`: direct successful SSH login as root
+- `successful-after-failures`: successful SSH login after repeated failures
 
 ### Generate a report
 
@@ -166,11 +141,9 @@ argus report --input findings.json --format markdown --output report.md
 argus report --input findings.json --format json
 ```
 
----
+## Ollama setup (optional)
 
-## Ollama Setup (Optional)
-
-ARGUS uses local LLMs through [Ollama](https://ollama.ai/) for AI-powered analysis. This is **optional** — ARGUS works fully without it using rule-based analysis.
+To use a local language model with ARGUS, install [Ollama](https://ollama.ai/) and configure it below. You can skip this setup if you only need rule-based analysis.
 
 ### Install Ollama
 
@@ -202,11 +175,10 @@ llm:
   enabled: true
 ```
 
----
-
-## Security Checks
+## Security checks
 
 ### SSH
+
 - Root login enabled
 - Password authentication enabled
 - Empty password login
@@ -214,37 +186,40 @@ llm:
 - Listening on all interfaces
 
 ### Users
+
 - UID 0 users other than root
 - Empty password fields
 - Recently created users
 - Service accounts with login shells
 
 ### Sudo
+
 - Passwordless sudo
 - Broad sudo access
 - Writable sudoers include files
 
 ### Persistence
+
 - Suspicious cron entries
 - Unusual systemd services
 - Writable systemd unit files
 - Shell scripts in startup paths
 
 ### Network
+
 - Unexpected listening services
 - Services bound to 0.0.0.0
 - Risky ports exposed
 
-### Auth Logs
+### Authentication logs
+
 - SSH brute-force attempts
 - Password spraying
 - Successful login after repeated failures
 - Sudo abuse
 - Suspicious root login
 
----
-
-## Severity Model
+## Severity levels
 
 | Level | Description |
 |-------|-------------|
@@ -254,9 +229,7 @@ llm:
 | **LOW** | Minor concern |
 | **INFO** | Informational note |
 
----
-
-## Project Structure
+## Project structure
 
 ```
 argus/
@@ -276,11 +249,10 @@ argus/
   docs/                  # Documentation assets
 ```
 
----
-
 ## Roadmap
 
-### MVP (Current)
+### MVP (current)
+
 - [x] Python package with CLI
 - [x] CLI with typer and Rich
 - [x] Data models and configuration
@@ -296,6 +268,7 @@ argus/
 - [x] Initial unit tests
 
 ### Future
+
 - [ ] YARA rule generation
 - [ ] Suricata rule generation
 - [ ] TUI dashboard (textual)
@@ -307,19 +280,17 @@ argus/
 - [ ] Multi-host collector
 - [ ] Baseline drift detection
 
----
-
 ## Contributing
 
-Contributions are welcome! Please:
+To contribute:
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/my-feature`)
 3. Commit your changes (`git commit -m 'feat: add my feature'`)
 4. Push to the branch (`git push origin feature/my-feature`)
-5. Open a Pull Request
+5. Open a pull request
 
-### Development Setup
+### Development setup
 
 ```bash
 git clone https://github.com/nodirumurkulov/Argus.git
@@ -328,18 +299,16 @@ pip install -e ".[dev]"
 pytest
 ```
 
-### Code Style
+### Code style
 
 - Python 3.11+
 - Type hints required
 - Ruff for linting
 - Conventional commits
 
----
+## Defensive use
 
-## Defensive-Only Disclaimer
-
-ARGUS is designed exclusively for **defensive security** purposes. It does **not** provide:
+ARGUS is built for defensive security. It does not provide:
 
 - Exploit execution
 - Brute-force tooling
@@ -350,7 +319,7 @@ ARGUS is designed exclusively for **defensive security** purposes. It does **not
 - Automatic privilege escalation
 - Persistence creation
 
-ARGUS **does** provide:
+Its defensive features include:
 
 - Defensive detection rules
 - Hardening advice
@@ -360,15 +329,6 @@ ARGUS **does** provide:
 - Local configuration review
 - Read-only security posture checks
 
----
-
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-<p align="center">
-  <strong>ARGUS</strong> — Local-first blue-team analysis for Linux.<br>
-  <em>Detect • Analyze • Harden • Defend</em>
-</p>
+Released under the [MIT License](LICENSE).
